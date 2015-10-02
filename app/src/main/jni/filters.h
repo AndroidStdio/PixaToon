@@ -1,9 +1,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-using namespace std;
 using namespace cv;
+using namespace std;
 
-void gradient(Mat&, Mat&);
-
-void cartoonFilter(Mat&);
+void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold);
+void quantize(Mat& src, Mat& dst);

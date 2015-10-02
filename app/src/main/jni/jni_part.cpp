@@ -3,17 +3,11 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "filters.h"
 
-using namespace std;
-using namespace cv;
-
 extern "C" {
 
-JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_Native_applyCartoonFilter(JNIEnv*, jobject, jlong );
-
-JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_Native_applyCartoonFilter(JNIEnv* env, jobject, jlong addrRgba)
-{
-    Mat& mRgba = *(Mat*)addrRgba;
-	cartoonFilter(mRgba);
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_common_Native_colorCartoonFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint thickness, jint threshold)
+{ 
+	colorCartoonFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)thickness, (int)threshold);
 }
 
 }

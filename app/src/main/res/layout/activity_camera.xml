@@ -3,9 +3,9 @@
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ajscape.pixatoon.activities.CameraActivity">
+    tools:context="com.ajscape.pixatoon.viewer.camera.CameraActivity">
 
-    <com.ajscape.pixatoon.PortraitCameraView
+    <com.ajscape.pixatoon.viewer.camera.PortraitCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"

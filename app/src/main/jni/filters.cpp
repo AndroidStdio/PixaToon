@@ -1,36 +1,46 @@
 #include "filters.h"
 
-using namespace std;
-using namespace cv;
+#define INPUT_MAX 100
+#define EDGE_THICK_MIN 1
+#define EDGE_THICK_MAX 401
+#define EDGE_THRESH_MIN 1
+#define EDGE_THRESH_MAX 15
 
-// Apply cartoon filter
-void cartoonFilter(Mat& img)
-{
-	Mat grad, grad_rgba, gray;
-
-	cvtColor(img, gray, CV_RGBA2GRAY);
-	gradient(gray, grad);
-	cvtColor(grad, grad_rgba, CV_GRAY2RGBA);
-	subtract(img, grad_rgba, img);
+void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) {
+	// denormalize params
+	edgeThickness *= (EDGE_THICK_MAX - EDGE_THICK_MIN)/INPUT_MAX + EDGE_THICK_MIN;
+	if(edgeThickness%2 == 0) edgeThickness++;
+	edgeThreshold *= (EDGE_THRESH_MAX - EDGE_THRESH_MIN)/INPUT_MAX + EDGE_THRESH_MIN;
+	
+    Mat src_gray, quantized, edges;
+    // Denoise image
+    GaussianBlur(src, src, Size(5,5), 0);
+    // Get src image grayscale
+    cvtColor(src, src_gray, CV_RGBA2GRAY);
+    // Quantize gray img to get discrete shades
+    quantize(src_gray, quantized);
+    // superimpose gray shades on color src img
+    cvtColor(quantized, dst, CV_GRAY2RGBA);
+    subtract(src, ~dst, dst);
+    // get illumination-resistant edges by adaptive thresholding
+    adaptiveThreshold(src_gray, src_gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, edgeThickness, edgeThreshold);
+    cvtColor(src_gray, edges, CV_GRAY2RGBA);
+    // superimpose edges on shaded src img
+    subtract(dst, ~edges, dst);
 }
 
-// Gradient 
-void gradient(Mat& src, Mat& dst)
-{
-	 /// Generate grad_x and grad_y
-    Mat grad_x, grad_y;
+void quantize(Mat& src, Mat& dst) {
+    uchar steps[4] = {50, 100, 150, 255};
+    //uchar step_val[4] = {10, 50, 100, 255};
+    uchar step_val[4] = {200, 210, 220, 255};
 
-    int scale = 1;
-    int delta = 0;
-    int ddepth = CV_16S;
-
-    Sobel( src, grad_x, ddepth, 1, 0, 3, scale, delta, BORDER_DEFAULT );
-    convertScaleAbs( grad_x, grad_x );
-
-    /// Gradient Y
-    Sobel( src, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT );
-    convertScaleAbs( grad_y, grad_y );
-
-    /// Total Gradient (approximate)
-    addWeighted( grad_x, 0.5, grad_y, 0.5, 0, dst );
+    uchar buffer[256];
+    int j=0;
+    for(int i=0; i!=256; ++i) {
+        if(i > steps[j])
+            j++;
+        buffer[i] = step_val[j];
+    } 
+    Mat table(1, 256, CV_8U, buffer, sizeof(buffer));
+    LUT(src, table, dst);
 }
