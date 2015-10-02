@@ -6,8 +6,13 @@ import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonFilter;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonConfigFragment;
 
+import org.opencv.core.Mat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Created by AtulJadhav on 9/20/2015.
@@ -15,74 +20,87 @@ import java.util.HashMap;
 
 public class FilterManager extends Application {
 
-    private ArrayList<Filter> filterList;
-    private HashMap<FilterType, Filter> filterType2FilterMap;
-    private HashMap<Integer, FilterType> btnId2FilterTypeMap;
-    private Filter currentFilter;
-    private Filter lastAppliedFilter;
-    private FilterSelectorFragment filterSelectorFragment;
-    private static FilterManager instance;
+    private ArrayList<Filter> mFilterList;
+    private HashMap<FilterType, Filter> mFilterType2FilterMap;
+    private HashMap<Integer, FilterType> mBtnId2FilterTypeMap;
+    private Filter mCurrentFilter;
+    private Filter mLastAppliedFilter;
+    private FilterSelectorFragment mFilterSelectorFragment;
+    private FilterProcessor mFilterProcessor;
+
+    private static FilterManager sInstance;
 
     public static FilterManager getInstance() {
-        if(instance == null)
-            instance = new FilterManager();
-        return instance;
+        if(sInstance == null)
+            sInstance = new FilterManager();
+        return sInstance;
     }
 
     private FilterManager() {
-        filterList = new ArrayList<>();
-        filterType2FilterMap = new HashMap<>();
-        btnId2FilterTypeMap = new HashMap<>();
-        filterSelectorFragment = new FilterSelectorFragment();
+        mFilterList = new ArrayList<>();
+        mFilterType2FilterMap = new HashMap<>();
+        mBtnId2FilterTypeMap = new HashMap<>();
+        mFilterSelectorFragment = new FilterSelectorFragment();
+        mFilterProcessor = new FilterProcessor(true);
 
         // initialize filters and add to list
         buildFilterList();
 
         // hash filters to maps for easy retreival
-        for( Filter filter : filterList) {
-            filterType2FilterMap.put( filter.getType(), filter);
-            btnId2FilterTypeMap.put( filter.getFilterSelectorBtnId(), filter.getType());
+        for( Filter filter : mFilterList) {
+            mFilterType2FilterMap.put( filter.getType(), filter);
+            mBtnId2FilterTypeMap.put( filter.getFilterSelectorBtnId(), filter.getType());
         }
     }
 
     private void buildFilterList() {
-        filterList.add( new ColorCartoonFilter(
+        mFilterList.add( new ColorCartoonFilter(
                 FilterType.COLOR_CARTOON,
                 new ColorCartoonConfigFragment(),
                 R.id.colorCartoonFilterBtn) );
     }
 
     public Filter getCurrentFilter() {
-        return currentFilter;
+        return mCurrentFilter;
     }
 
-    public FilterSelectorFragment getFilterSelectorFragment() { return filterSelectorFragment; }
+    public void processCurrentFilter(Mat srcMat, Mat dstMat) {
+        if(mCurrentFilter != null)
+            mFilterProcessor.processFilter(mCurrentFilter, srcMat, dstMat);
+        else
+            srcMat.copyTo(dstMat);
+    }
+
+    public FilterSelectorFragment getFilterSelectorFragment() { return mFilterSelectorFragment; }
 
     public void setCurrentFilter(FilterType filterType) {
-        lastAppliedFilter = currentFilter;
-        currentFilter = filterType2FilterMap.get(filterType);
+        mLastAppliedFilter = mCurrentFilter;
+        mCurrentFilter = mFilterType2FilterMap.get(filterType);
     }
 
     public void applyCurrentFilter() {
-        if(lastAppliedFilter != null && lastAppliedFilter != currentFilter)
-            lastAppliedFilter.resetConfig();
-        lastAppliedFilter = currentFilter;
+        if(mLastAppliedFilter != null && mLastAppliedFilter != mCurrentFilter)
+            mLastAppliedFilter.resetConfig();
+        mLastAppliedFilter = mCurrentFilter;
     }
 
     public void cancelCurrentFilter() {
-        currentFilter = lastAppliedFilter;
+        mCurrentFilter = mLastAppliedFilter;
     }
 
     public Filter getFilterByType(FilterType filterType) {
-        return filterType2FilterMap.get(filterType);
+        return mFilterType2FilterMap.get(filterType);
     }
 
     public FilterType getFilterTypeByBtnId(int filterSelectorBtnId) {
-        return btnId2FilterTypeMap.get(filterSelectorBtnId);
+        return mBtnId2FilterTypeMap.get(filterSelectorBtnId);
     }
 
     public void reset() {
-        currentFilter = null;
-        lastAppliedFilter = null;
+        mCurrentFilter = null;
+        mLastAppliedFilter = null;
+        mFilterProcessor.changeInputMode();
     }
 }
+
+

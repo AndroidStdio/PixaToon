@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".viewer.picture.PictureActivity"
+            android:name=".viewer.picture.ImageActivity"
             android:label="@string/title_activity_image"
             android:screenOrientation="portrait">
         </activity>

@@ -15,8 +15,7 @@ import android.view.WindowManager;
 import com.ajscape.pixatoon.common.FilterConfigListener;
 import com.ajscape.pixatoon.common.FilterManager;
 import com.ajscape.pixatoon.R;
-import com.ajscape.pixatoon.viewer.picture.PictureActivity;
-import com.ajscape.pixatoon.common.Filter;
+import com.ajscape.pixatoon.viewer.picture.ImageActivity;
 import com.ajscape.pixatoon.common.FilterType;
 import com.ajscape.pixatoon.common.FilterSelectorFragment;
 import com.ajscape.pixatoon.common.FilterSelectorListener;
@@ -117,12 +116,8 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         inputMat = inputFrame.rgba();
-        Filter currentFilter = filterManager.getCurrentFilter();
-        if(currentFilter != null) {
-            currentFilter.process(inputMat, filteredMat);
-            return filteredMat;
-        }
-        return inputMat;
+        filterManager.processCurrentFilter(inputMat, filteredMat);
+        return filteredMat;
     }
 
     public void pickImage(View view) {
@@ -147,10 +142,11 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 String imgPath = cursor.getString(columnIndex);
                 cursor.close();
-                Log.d(TAG,"Image selected - "+imgPath);
+                Log.d(TAG, "Image selected - " + imgPath);
 
-                Intent intent = new Intent(getBaseContext(),PictureActivity.class);
+                Intent intent = new Intent(getBaseContext(),ImageActivity.class);
                 intent.putExtra("EXTRA_IMG_PATH", imgPath);
+                filterManager.reset();
                 startActivity(intent);
             }
         }

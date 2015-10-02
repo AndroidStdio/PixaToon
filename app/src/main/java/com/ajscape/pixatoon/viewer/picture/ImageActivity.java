@@ -23,30 +23,32 @@ import com.ajscape.pixatoon.common.FilterSelectorListener;
 import com.ajscape.pixatoon.viewer.camera.CameraActivity;
 
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
-public class PictureActivity extends Activity implements FilterSelectorListener, FilterConfigListener {
+public class ImageActivity extends Activity implements FilterSelectorListener, FilterConfigListener {
 
-    private FilterManager filterManager;
-    private Fragment filterConfigFragment;
-    private FilterSelectorFragment filterSelectorFragment;
-    private ImageView imgView;
-    private Bitmap inputBitmap;
-    private Bitmap filteredBitmap;
-    private Mat inputMat, filteredMat;
-    private boolean isFilterConfigDisplayed = false;
-    private boolean isFilterSelectorDisplayed = false;
+    private FilterManager mFilterManager;
+    private Fragment mFilterConfigFragment;
+    private FilterSelectorFragment mFilterSelectorFragment;
+    private ImageView mImgView;
+    private Bitmap mInputBitmap;
+    private Bitmap mFilteredBitmap;
+    private Mat mInputMat, mFilteredMat;
+    private boolean mIsFilterConfigDisplayed = false;
+    private boolean mIsFilterSelectorDisplayed = false;
+    //private Thread mImageUpdaterThread;
 
-    private static final String TAG = "PictureActivity";
+    private static final String TAG = "ImageActivity";
     private static final int SELECT_PICTURE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picture);
-        filterManager = FilterManager.getInstance();
+        mFilterManager = FilterManager.getInstance();
 
-        imgView = (ImageView)findViewById(R.id.imgView);
+        mImgView = (ImageView)findViewById(R.id.imgView);
 
         Bundle extras =  getIntent().getExtras();
         if(extras != null) {
@@ -57,27 +59,27 @@ public class PictureActivity extends Activity implements FilterSelectorListener,
     }
 
     public void loadImage(String imgPath) {
-        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
-        bmpFactoryOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        inputBitmap = BitmapFactory.decodeFile(imgPath,bmpFactoryOptions);
-        filteredBitmap = BitmapFactory.decodeFile(imgPath,bmpFactoryOptions);
-        inputMat = new Mat();
-        filteredMat = new Mat();
-        Utils.bitmapToMat(inputBitmap, inputMat);
-        imgView.setImageBitmap(inputBitmap);
+        mInputBitmap = com.ajscape.pixatoon.common.Utils.decodeSampledBitmapFromFile(imgPath,500,500);
+        mFilteredBitmap = com.ajscape.pixatoon.common.Utils.decodeSampledBitmapFromFile(imgPath, 500, 500);
+        mInputMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
+        mFilteredMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
+        Utils.bitmapToMat(mInputBitmap, mInputMat);
+        mImgView.setImageBitmap(mInputBitmap);
     }
 
     public void updateImage() {
-        Filter currentFilter = filterManager.getCurrentFilter();
+        Filter currentFilter = mFilterManager.getCurrentFilter();
         if(currentFilter != null) {
-            currentFilter.process(inputMat, filteredMat);
-            Utils.matToBitmap(filteredMat, filteredBitmap);
-            imgView.setImageBitmap(filteredBitmap);
+            Utils.bitmapToMat(mInputBitmap, mInputMat);
+            mFilterManager.processCurrentFilter(mInputMat, mFilteredMat);
+            Utils.matToBitmap(mFilteredMat, mFilteredBitmap);
+            mImgView.setImageBitmap(mFilteredBitmap);
         }
     }
 
     public void switchCamera(View view) {
         Intent intent = new Intent(getBaseContext(), CameraActivity.class);
+        mFilterManager.reset();
         startActivity(intent);
     }
 
@@ -111,69 +113,69 @@ public class PictureActivity extends Activity implements FilterSelectorListener,
     }
 
     public void showFilterSelector(View view) {
-        if(!isFilterSelectorDisplayed) {
-            filterSelectorFragment = new FilterSelectorFragment();
+        if(!mIsFilterSelectorDisplayed) {
+            mFilterSelectorFragment = new FilterSelectorFragment();
 
             getFragmentManager()
                     .beginTransaction()
-                    .add(R.id.imgFilterSelectorPanel, filterSelectorFragment)
+                    .add(R.id.imgFilterSelectorPanel, mFilterSelectorFragment)
                     .commit();
-            isFilterSelectorDisplayed = true;
+            mIsFilterSelectorDisplayed = true;
         }
         else {
 
             getFragmentManager()
                     .beginTransaction()
-                    .remove(filterSelectorFragment)
+                    .remove(mFilterSelectorFragment)
                     .commit();
-            isFilterSelectorDisplayed = false;
+            mIsFilterSelectorDisplayed = false;
         }
     }
 
     public void showFilterConfig(View view) {
-        if(!isFilterConfigDisplayed) {
-            filterConfigFragment = filterManager.getCurrentFilter().getConfigFragment();
+        if(!mIsFilterConfigDisplayed) {
+            mFilterConfigFragment = mFilterManager.getCurrentFilter().getConfigFragment();
 
             getFragmentManager()
                     .beginTransaction()
-                    .add(R.id.imgFilterConfigPanel, filterConfigFragment)
+                    .add(R.id.imgFilterConfigPanel, mFilterConfigFragment)
                     .commit();
-            isFilterConfigDisplayed = true;
+            mIsFilterConfigDisplayed = true;
         }
         else {
 
             getFragmentManager()
                     .beginTransaction()
-                    .remove(filterConfigFragment)
+                    .remove(mFilterConfigFragment)
                     .commit();
-            isFilterConfigDisplayed = false;
+            mIsFilterConfigDisplayed = false;
         }
     }
 
     @Override
     public void onFilterSelect(FilterType filterType) {
-        filterManager.setCurrentFilter(filterType);
+        mFilterManager.setCurrentFilter(filterType);
         updateImage();
     }
 
     @Override
     public void onFilterApply() {
-        filterManager.applyCurrentFilter();
+        mFilterManager.applyCurrentFilter();
         getFragmentManager()
                 .beginTransaction()
-                .remove(filterSelectorFragment)
+                .remove(mFilterSelectorFragment)
                 .commit();
-        isFilterSelectorDisplayed = false;
+        mIsFilterSelectorDisplayed = false;
     }
 
     @Override
     public void onFilterCancel() {
-        filterManager.cancelCurrentFilter();
+        mFilterManager.cancelCurrentFilter();
         getFragmentManager()
                 .beginTransaction()
-                .remove(filterSelectorFragment)
+                .remove(mFilterSelectorFragment)
                 .commit();
-        isFilterSelectorDisplayed = false;
+        mIsFilterSelectorDisplayed = false;
         updateImage();
     }
 
