@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".viewer.picture.ImageActivity"
+            android:name=".viewer.image.ImageActivity"
             android:label="@string/title_activity_image"
             android:screenOrientation="portrait">
         </activity>
@@ -26,6 +26,7 @@
     </application>
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-feature android:name="android.hardware.camera" android:required="false"/>

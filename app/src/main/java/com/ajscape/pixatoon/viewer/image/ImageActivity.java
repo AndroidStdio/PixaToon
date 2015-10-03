@@ -1,17 +1,17 @@
-package com.ajscape.pixatoon.viewer.picture;
+package com.ajscape.pixatoon.viewer.image;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.ajscape.pixatoon.common.FilterConfigListener;
 import com.ajscape.pixatoon.common.FilterManager;
@@ -26,6 +26,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import java.io.IOException;
+
 public class ImageActivity extends Activity implements FilterSelectorListener, FilterConfigListener {
 
     private FilterManager mFilterManager;
@@ -37,7 +39,6 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
     private Mat mInputMat, mFilteredMat;
     private boolean mIsFilterConfigDisplayed = false;
     private boolean mIsFilterSelectorDisplayed = false;
-    //private Thread mImageUpdaterThread;
 
     private static final String TAG = "ImageActivity";
     private static final int SELECT_PICTURE = 1;
@@ -59,8 +60,8 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
     }
 
     public void loadImage(String imgPath) {
-        mInputBitmap = com.ajscape.pixatoon.common.Utils.decodeSampledBitmapFromFile(imgPath,500,500);
-        mFilteredBitmap = com.ajscape.pixatoon.common.Utils.decodeSampledBitmapFromFile(imgPath, 500, 500);
+        mInputBitmap = ImageUtils.decodeSampledBitmapFromFile(imgPath, 500, 500);
+        mFilteredBitmap = Bitmap.createBitmap(mInputBitmap.getWidth(), mInputBitmap.getHeight(),Bitmap.Config.ARGB_8888);
         mInputMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
         mFilteredMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
         Utils.bitmapToMat(mInputBitmap, mInputMat);
@@ -88,6 +89,20 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
+    }
+
+    public void saveImage(View view) {
+        /*
+        mFilterManager.getCurrentFilter().process(matRgba, matRgba);
+        Bitmap filteredBitmap = Bitmap.createBitmap(matRgba.cols(),  matRgba.rows(),Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(matRgba, filteredBitmap);
+        */
+        try {
+            String savedPicturePath = ImageUtils.saveBitmap(getContentResolver(), mFilteredBitmap);
+            Toast.makeText(getApplicationContext(), "Saved picture at " + savedPicturePath, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Error: Unable to take picture", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

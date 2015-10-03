@@ -1,14 +1,23 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.viewer.image;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Created by AtulJadhav on 10/2/2015.
  */
-public class Utils {
-    public static final String TAG = "Utils:";
+public class ImageUtils {
+    public static final String TAG = "ImageUtils:";
 
     public static Bitmap decodeSampledBitmapFromFile(String imgPath, int reqWidth, int reqHeight) {
 
@@ -47,5 +56,28 @@ public class Utils {
         }
 
         return inSampleSize;
+    }
+
+    public static String saveBitmap(ContentResolver cr,Bitmap pictureBitmap) throws IOException {
+        String path = Environment.getExternalStorageDirectory().toString();
+        OutputStream fOut = null;
+        String savedFilePath = path+ "/Pixatoon/test.jpg";
+        File file = new File(savedFilePath); // the File to save to
+        file.getParentFile().mkdirs();
+        try {
+            if(!file.exists())
+                file.createNewFile();
+            fOut = new FileOutputStream(file);
+
+            pictureBitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
+            fOut.close(); // do not forget to close the stream
+
+            MediaStore.Images.Media.insertImage(cr, file.getAbsolutePath(), file.getName(), file.getName());
+        } catch(IOException e) {
+            String errorMsg = "Unable to save image at "+ savedFilePath;
+            Log.e(TAG, errorMsg + ":" + e.getMessage());
+            throw new IOException(errorMsg);
+        }
+        return savedFilePath;
     }
 }

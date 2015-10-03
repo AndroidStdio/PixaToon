@@ -22,7 +22,7 @@ import org.opencv.imgproc.Imgproc;
 /**
  * Created by AtulJadhav on 9/20/2015.
  */
-public class PortraitCameraView extends CameraBridgeViewBase implements PreviewCallback {
+public class OpenCvCameraView extends CameraBridgeViewBase implements PreviewCallback, Camera.PictureCallback {
 
     private static final int MAGIC_TEXTURE_ID = 10;
     private static final String TAG = "JavaCameraView";
@@ -37,6 +37,7 @@ public class PortraitCameraView extends CameraBridgeViewBase implements PreviewC
     protected JavaCameraFrame[] mCameraFrame;
     private SurfaceTexture mSurfaceTexture;
     private int mCameraId;
+    private PictureCallback mPictureCallback;
 
     public static class JavaCameraSizeAccessor implements ListItemAccessor {
 
@@ -51,13 +52,19 @@ public class PortraitCameraView extends CameraBridgeViewBase implements PreviewC
         }
     }
 
-    public PortraitCameraView(Context context, int cameraId) {
+    public interface PictureCallback {
+        void pictureTaken(byte[] data, int height, int width);
+    }
+
+    public OpenCvCameraView(Context context, int cameraId) {
         super(context, cameraId);
     }
 
-    public PortraitCameraView(Context context, AttributeSet attrs) {
+    public OpenCvCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
+    public void setPictureCallback(PictureCallback pictureCallback) { mPictureCallback = pictureCallback; }
 
     protected boolean initializeCamera(int width, int height) {
         Log.d(TAG, "Initialize java camera");
@@ -159,7 +166,6 @@ public class PortraitCameraView extends CameraBridgeViewBase implements PreviewC
                 e.printStackTrace();
             }
         }
-
         return result;
     }
 
@@ -237,6 +243,39 @@ public class PortraitCameraView extends CameraBridgeViewBase implements PreviewC
             mCamera.addCallbackBuffer(mBuffer);
     }
 
+    public void takePicture() {
+        if(mPictureCallback == null) {
+            String errorMsg = "Picture Callback should be set before taking picture";
+            Log.e(TAG, errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        Log.i(TAG, "Taking picture");
+        // Postview and jpeg are sent in the same buffers if the queue is not empty when performing a capture.
+        // Clear up buffers to avoid mCamera.takePicture to be stuck because of a memory issue
+
+        mCamera.setPreviewCallback(null);
+
+        // PictureCallback is implemented by the current class
+        mCamera.takePicture(null, null, this);
+    }
+
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        if(mPictureCallback == null) {
+            String errorMsg = "Picture Callback should be set before taking picture";
+            Log.e(TAG, errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        Log.i(TAG, "Calling picture callback");
+        // The camera preview was automatically stopped. Start it again.
+        mCamera.startPreview();
+        mCamera.setPreviewCallback(this);
+
+        mPictureCallback.pictureTaken(data, mCamera.getParameters().getPictureSize().width, mCamera.getParameters().getPictureSize().height);
+    }
+
     private class JavaCameraFrame implements CvCameraViewFrame {
         private Mat mYuvFrameData;
         private Mat mRgba;
@@ -280,9 +319,9 @@ public class PortraitCameraView extends CameraBridgeViewBase implements PreviewC
 
         public void run() {
             do {
-                synchronized (PortraitCameraView.this) {
+                synchronized (OpenCvCameraView.this) {
                     try {
-                        PortraitCameraView.this.wait();
+                        OpenCvCameraView.this.wait();
                     } catch (InterruptedException e) {
                         Log.e(TAG, "CameraWorker interrupted", e);
                     }

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -11,38 +13,44 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.ajscape.pixatoon.common.FilterConfigListener;
 import com.ajscape.pixatoon.common.FilterManager;
 import com.ajscape.pixatoon.R;
-import com.ajscape.pixatoon.viewer.picture.ImageActivity;
+import com.ajscape.pixatoon.viewer.image.ImageActivity;
 import com.ajscape.pixatoon.common.FilterType;
 import com.ajscape.pixatoon.common.FilterSelectorFragment;
 import com.ajscape.pixatoon.common.FilterSelectorListener;
+import com.ajscape.pixatoon.viewer.image.ImageUtils;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
-public class CameraActivity extends Activity implements CvCameraViewListener2, FilterSelectorListener, FilterConfigListener {
+import java.io.IOException;
+
+public class CameraActivity extends Activity implements CvCameraViewListener2, FilterSelectorListener, FilterConfigListener, OpenCvCameraView.PictureCallback {
 
     private static final int SELECT_PICTURE = 1;
     private static final String TAG = "CameraActivity";
 
-    private FilterSelectorFragment filterSelectorFragment;
-    private Fragment filterConfigFragment;
-    private boolean isFilterSelectorDisplayed = false;
-    private boolean isFilterConfigDisplayed = false;
+    private FilterSelectorFragment mFilterSelectorFragment;
+    private Fragment mFilterConfigFragment;
+    private boolean mIsFilterSelectorDisplayed = false;
+    private boolean mIsFilterConfigDisplayed = false;
 
-    private CameraBridgeViewBase openCvCameraView;
-    private FilterManager filterManager;
-    private Mat inputMat, filteredMat;
+    private OpenCvCameraView mOpenCvCameraView;
+    private FilterManager mFilterManager;
+    private Mat mInputMat, mFilteredMat;
 
-    private BaseLoaderCallback openCvLoaderCallback = new BaseLoaderCallback(this) {
+    private BaseLoaderCallback mOpenCvLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
@@ -51,7 +59,7 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
                     Log.i(TAG, "OpenCV loaded successfully");
                     // Load native library after(!) OpenCV initialization
                     System.loadLibrary("image_filters");
-                    openCvCameraView.enableView();
+                    mOpenCvCameraView.enableView();
                 } break;
                 default:
                 {
@@ -68,19 +76,20 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_camera);
 
-        openCvCameraView = (CameraBridgeViewBase) findViewById(R.id.camView);
-        openCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        openCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView = (OpenCvCameraView) findViewById(R.id.camView);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+        mOpenCvCameraView.setPictureCallback(this);
 
-        filterManager = FilterManager.getInstance();
+        mFilterManager = FilterManager.getInstance();
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
-        if (openCvCameraView != null)
-            openCvCameraView.disableView();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
     }
 
     @Override
@@ -89,23 +98,23 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, openCvLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mOpenCvLoaderCallback);
         } else {
             Log.d(TAG, "OpenCV library found inside package. Using it!");
-            openCvLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+            mOpenCvLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
 
     public void onDestroy() {
         super.onDestroy();
-        if (openCvCameraView != null)
-            openCvCameraView.disableView();
+        if (mOpenCvCameraView != null)
+            mOpenCvCameraView.disableView();
     }
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        inputMat = new Mat(height, width, CvType.CV_8UC4);
-        filteredMat = new Mat(height, width, CvType.CV_8UC4);
+        mInputMat = new Mat(height, width, CvType.CV_8UC4);
+        mFilteredMat = new Mat(height, width, CvType.CV_8UC4);
     }
 
     @Override
@@ -115,9 +124,9 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        inputMat = inputFrame.rgba();
-        filterManager.processCurrentFilter(inputMat, filteredMat);
-        return filteredMat;
+        mInputMat = inputFrame.rgba();
+        mFilterManager.processCurrentFilter(mInputMat, mFilteredMat);
+        return mFilteredMat;
     }
 
     public void pickImage(View view) {
@@ -146,84 +155,104 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
 
                 Intent intent = new Intent(getBaseContext(),ImageActivity.class);
                 intent.putExtra("EXTRA_IMG_PATH", imgPath);
-                filterManager.reset();
+                mFilterManager.reset();
                 startActivity(intent);
             }
         }
     }
 
     public void showFilterSelector(View view) {
-        if(!isFilterSelectorDisplayed) {
-            filterSelectorFragment = filterManager.getFilterSelectorFragment();
+        if(!mIsFilterSelectorDisplayed) {
+            mFilterSelectorFragment = mFilterManager.getFilterSelectorFragment();
 
             getFragmentManager()
                     .beginTransaction()
-                    .add(R.id.camFilterSelectorPanel, filterSelectorFragment)
+                    .add(R.id.camFilterSelectorPanel, mFilterSelectorFragment)
                     .commit();
-            isFilterSelectorDisplayed = true;
+            mIsFilterSelectorDisplayed = true;
             Log.d(TAG,"filter selector opened");
         }
         else {
 
             getFragmentManager()
                     .beginTransaction()
-                    .remove(filterSelectorFragment)
+                    .remove(mFilterSelectorFragment)
                     .commit();
-            isFilterSelectorDisplayed = false;
+            mIsFilterSelectorDisplayed = false;
             Log.d(TAG,"filter selector closed");
         }
     }
 
     public void showFilterConfig(View view) {
-        if(!isFilterConfigDisplayed) {
-            filterConfigFragment = filterManager.getCurrentFilter().getConfigFragment();
+        if(!mIsFilterConfigDisplayed) {
+            mFilterConfigFragment = mFilterManager.getCurrentFilter().getConfigFragment();
             getFragmentManager()
                     .beginTransaction()
-                    .add(R.id.camFilterConfigPanel, filterConfigFragment)
+                    .add(R.id.camFilterConfigPanel, mFilterConfigFragment)
                     .commit();
-            isFilterConfigDisplayed = true;
+            mIsFilterConfigDisplayed = true;
             Log.d(TAG,"filter config opened");
         }
         else {
             getFragmentManager()
                     .beginTransaction()
-                    .remove(filterConfigFragment)
+                    .remove(mFilterConfigFragment)
                     .commit();
-            isFilterConfigDisplayed = false;
+            mIsFilterConfigDisplayed = false;
             Log.d(TAG,"filter config closed");
         }
     }
 
     @Override
     public void onFilterSelect(FilterType filterType) {
-        filterManager.setCurrentFilter(filterType);
+        mFilterManager.setCurrentFilter(filterType);
         Log.d(TAG, "current filter set to "+ filterType.name());
     }
 
     @Override
     public void onFilterApply() {
-        filterManager.applyCurrentFilter();
+        mFilterManager.applyCurrentFilter();
         getFragmentManager()
                 .beginTransaction()
-                .remove(filterSelectorFragment)
+                .remove(mFilterSelectorFragment)
                 .commit();
-        isFilterSelectorDisplayed = false;
+        mIsFilterSelectorDisplayed = false;
         Log.d(TAG,"current filter selected");
     }
 
     @Override
     public void onFilterCancel() {
-        filterManager.cancelCurrentFilter();
+        mFilterManager.cancelCurrentFilter();
         getFragmentManager()
                 .beginTransaction()
-                .remove(filterSelectorFragment)
+                .remove(mFilterSelectorFragment)
                 .commit();
-        isFilterSelectorDisplayed = false;
+        mIsFilterSelectorDisplayed = false;
         Log.d(TAG,"current filter cancelled");
     }
 
     @Override
-    public void onFilterConfigChanged() {
+    public void onFilterConfigChanged() {}
 
+    public void takePicture(View view) {
+        mOpenCvCameraView.takePicture();
+    }
+
+    @Override
+    public void pictureTaken(byte[] data, int width, int height) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap pictureBitmap = BitmapFactory.decodeByteArray(data,0,data.length, options);
+        Mat srcRgba = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
+        Mat dstRgba = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
+        Utils.bitmapToMat(pictureBitmap, srcRgba);
+        mFilterManager.getCurrentFilter().process(srcRgba, dstRgba);
+        Utils.matToBitmap(dstRgba, pictureBitmap);
+        try {
+            String savedPicturePath = ImageUtils.saveBitmap(getContentResolver(), pictureBitmap);
+            Toast.makeText(getApplicationContext(), "Saved picture at "+savedPicturePath, Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Error: Unable to take picture", Toast.LENGTH_SHORT).show();
+        }
     }
 }

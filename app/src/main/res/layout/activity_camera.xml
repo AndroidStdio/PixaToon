@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context="com.ajscape.pixatoon.viewer.camera.CameraActivity">
 
-    <com.ajscape.pixatoon.viewer.camera.PortraitCameraView
+    <com.ajscape.pixatoon.viewer.camera.OpenCvCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"
@@ -36,7 +36,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="Click"/>
+            android:text="Click"
+            android:onClick="takePicture"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
