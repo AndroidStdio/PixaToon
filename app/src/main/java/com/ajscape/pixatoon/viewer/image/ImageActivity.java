@@ -92,11 +92,6 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
     }
 
     public void saveImage(View view) {
-        /*
-        mFilterManager.getCurrentFilter().process(matRgba, matRgba);
-        Bitmap filteredBitmap = Bitmap.createBitmap(matRgba.cols(),  matRgba.rows(),Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(matRgba, filteredBitmap);
-        */
         try {
             String savedPicturePath = ImageUtils.saveBitmap(getContentResolver(), mFilteredBitmap);
             Toast.makeText(getApplicationContext(), "Saved picture at " + savedPicturePath, Toast.LENGTH_SHORT).show();

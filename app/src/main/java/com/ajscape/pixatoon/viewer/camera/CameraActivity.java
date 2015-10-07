@@ -243,11 +243,10 @@ public class CameraActivity extends Activity implements CvCameraViewListener2, F
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap pictureBitmap = BitmapFactory.decodeByteArray(data,0,data.length, options);
-        Mat srcRgba = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
-        Mat dstRgba = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
-        Utils.bitmapToMat(pictureBitmap, srcRgba);
-        mFilterManager.getCurrentFilter().process(srcRgba, dstRgba);
-        Utils.matToBitmap(dstRgba, pictureBitmap);
+        Mat pictureMat = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
+        Utils.bitmapToMat(pictureBitmap, pictureMat);
+        mFilterManager.getCurrentFilter().process(pictureMat, pictureMat);
+        Utils.matToBitmap(pictureMat, pictureBitmap);
         try {
             String savedPicturePath = ImageUtils.saveBitmap(getContentResolver(), pictureBitmap);
             Toast.makeText(getApplicationContext(), "Saved picture at "+savedPicturePath, Toast.LENGTH_SHORT).show();

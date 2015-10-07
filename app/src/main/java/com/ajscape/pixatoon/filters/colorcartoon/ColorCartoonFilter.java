@@ -28,8 +28,8 @@ public class ColorCartoonFilter extends Filter {
 
     @Override
     public void resetConfig() {
+        thickness = 10;
         threshold = 50;
-        thickness = 50;
     }
 
     public int getThreshold() {

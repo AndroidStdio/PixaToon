@@ -1,27 +1,27 @@
 #include "filters.h"
 
 #define INPUT_MAX 100
-#define EDGE_THICK_MIN 1
-#define EDGE_THICK_MAX 401
+#define EDGE_THICK_MIN 3
+#define EDGE_THICK_MAX 201
 #define EDGE_THRESH_MIN 1
-#define EDGE_THRESH_MAX 15
+#define EDGE_THRESH_MAX 8
 
 void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) {
 	// denormalize params
-	edgeThickness *= (EDGE_THICK_MAX - EDGE_THICK_MIN)/INPUT_MAX + EDGE_THICK_MIN;
+	edgeThickness = (edgeThickness*(EDGE_THICK_MAX - EDGE_THICK_MIN))/INPUT_MAX + EDGE_THICK_MIN;
 	if(edgeThickness%2 == 0) edgeThickness++;
-	edgeThreshold *= (EDGE_THRESH_MAX - EDGE_THRESH_MIN)/INPUT_MAX + EDGE_THRESH_MIN;
+	edgeThreshold = (edgeThreshold*(EDGE_THRESH_MAX - EDGE_THRESH_MIN))/INPUT_MAX + EDGE_THRESH_MIN;
 	
-    Mat src_gray, quantized, edges;
+    Mat src_blurred, src_gray, quantized, edges;
     // Denoise image
-    GaussianBlur(src, src, Size(5,5), 0);
+    GaussianBlur(src, src_blurred, Size(5,5), 0);
     // Get src image grayscale
-    cvtColor(src, src_gray, CV_RGBA2GRAY);
+    cvtColor(src_blurred, src_gray, CV_RGBA2GRAY);
     // Quantize gray img to get discrete shades
     quantize(src_gray, quantized);
     // superimpose gray shades on color src img
     cvtColor(quantized, dst, CV_GRAY2RGBA);
-    subtract(src, ~dst, dst);
+    subtract(src_blurred, ~dst, dst);
     // get illumination-resistant edges by adaptive thresholding
     adaptiveThreshold(src_gray, src_gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, edgeThickness, edgeThreshold);
     cvtColor(src_gray, edges, CV_GRAY2RGBA);
