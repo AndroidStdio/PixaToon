@@ -53,7 +53,7 @@ public class OpenCvCameraView extends CameraBridgeViewBase implements PreviewCal
     }
 
     public interface PictureCallback {
-        void pictureTaken(byte[] data, int height, int width);
+        void onPictureTaken(byte[] data, int height, int width);
     }
 
     public OpenCvCameraView(Context context, int cameraId) {
@@ -273,7 +273,7 @@ public class OpenCvCameraView extends CameraBridgeViewBase implements PreviewCal
         mCamera.startPreview();
         mCamera.setPreviewCallback(this);
 
-        mPictureCallback.pictureTaken(data, mCamera.getParameters().getPictureSize().width, mCamera.getParameters().getPictureSize().height);
+        mPictureCallback.onPictureTaken(data, mCamera.getParameters().getPictureSize().width, mCamera.getParameters().getPictureSize().height);
     }
 
     private class JavaCameraFrame implements CvCameraViewFrame {

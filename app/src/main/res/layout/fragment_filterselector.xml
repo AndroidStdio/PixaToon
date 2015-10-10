@@ -32,7 +32,7 @@
             android:orientation="horizontal"
             android:background="#ff000000">
             <Button
-                android:id="@+id/filterSelectBtn"
+                android:id="@+id/filterApplyBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

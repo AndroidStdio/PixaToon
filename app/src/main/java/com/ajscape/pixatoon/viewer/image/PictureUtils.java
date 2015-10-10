@@ -16,8 +16,8 @@ import java.io.OutputStream;
 /**
  * Created by AtulJadhav on 10/2/2015.
  */
-public class ImageUtils {
-    public static final String TAG = "ImageUtils:";
+public class PictureUtils {
+    public static final String TAG = "PictureUtils:";
 
     public static Bitmap decodeSampledBitmapFromFile(String imgPath, int reqWidth, int reqHeight) {
 

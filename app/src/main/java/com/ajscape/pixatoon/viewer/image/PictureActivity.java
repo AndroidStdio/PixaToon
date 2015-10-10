@@ -28,7 +28,7 @@ import org.opencv.core.Mat;
 
 import java.io.IOException;
 
-public class ImageActivity extends Activity implements FilterSelectorListener, FilterConfigListener {
+public class PictureActivity extends Activity implements FilterSelectorListener, FilterConfigListener {
 
     private FilterManager mFilterManager;
     private Fragment mFilterConfigFragment;
@@ -40,7 +40,7 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
     private boolean mIsFilterConfigDisplayed = false;
     private boolean mIsFilterSelectorDisplayed = false;
 
-    private static final String TAG = "ImageActivity";
+    private static final String TAG = "PictureActivity";
     private static final int SELECT_PICTURE = 1;
 
     @Override
@@ -60,7 +60,7 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
     }
 
     public void loadImage(String imgPath) {
-        mInputBitmap = ImageUtils.decodeSampledBitmapFromFile(imgPath, 500, 500);
+        mInputBitmap = PictureUtils.decodeSampledBitmapFromFile(imgPath, 500, 500);
         mFilteredBitmap = Bitmap.createBitmap(mInputBitmap.getWidth(), mInputBitmap.getHeight(),Bitmap.Config.ARGB_8888);
         mInputMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
         mFilteredMat = new Mat(mInputBitmap.getHeight(), mInputBitmap.getWidth(), CvType.CV_8UC4);
@@ -93,7 +93,7 @@ public class ImageActivity extends Activity implements FilterSelectorListener, F
 
     public void saveImage(View view) {
         try {
-            String savedPicturePath = ImageUtils.saveBitmap(getContentResolver(), mFilteredBitmap);
+            String savedPicturePath = PictureUtils.saveBitmap(getContentResolver(), mFilteredBitmap);
             Toast.makeText(getApplicationContext(), "Saved picture at " + savedPicturePath, Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(), "Error: Unable to take picture", Toast.LENGTH_SHORT).show();
