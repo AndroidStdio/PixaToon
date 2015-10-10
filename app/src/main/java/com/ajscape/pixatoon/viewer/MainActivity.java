@@ -5,39 +5,23 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.ajscape.pixatoon.R;
-import com.ajscape.pixatoon.common.FilterConfigListener;
-import com.ajscape.pixatoon.common.FilterManager;
-import com.ajscape.pixatoon.common.FilterPictureCallback;
-import com.ajscape.pixatoon.common.FilterSelectorFragment;
-import com.ajscape.pixatoon.common.FilterSelectorListener;
-import com.ajscape.pixatoon.common.FilterType;
-import com.ajscape.pixatoon.viewer.camera.OpenCvCameraView;
-import com.ajscape.pixatoon.viewer.image.PictureActivity;
-import com.ajscape.pixatoon.viewer.image.PictureUtils;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
+import com.ajscape.pixatoon.filters.FilterConfigListener;
+import com.ajscape.pixatoon.filters.FilterManager;
+import com.ajscape.pixatoon.filters.FilterSelectorFragment;
+import com.ajscape.pixatoon.filters.FilterSelectorListener;
+import com.ajscape.pixatoon.filters.FilterType;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 public class MainActivity extends Activity implements FilterSelectorListener, FilterConfigListener, View.OnClickListener {
 
@@ -136,7 +120,6 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void openPictureFilterViewer(String pictureFilePath) {
         if(mFilterViewerMode != FilterViewerMode.PICTURE) {
-            Log.d(TAG,"Picture viewer not set, adding it");
             Bundle args = new Bundle();
             args.putString("pictureFilePath", pictureFilePath);
             mPictureViewerFragment.setArguments(args);
@@ -145,8 +128,9 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
                     .replace(R.id.filterViewer, mPictureViewerFragment)
                     .commit();
             mFilterViewerMode = FilterViewerMode.PICTURE;
+            mViewerActionBtn.setImageResource(R.drawable.save_icon);
+            mOpenCameraBtn.setImageResource(R.drawable.camera_icon);
         } else {
-            Log.d(TAG,"Picture viewer already set");
             mPictureViewerFragment.loadPicture(pictureFilePath);
         }
     }
@@ -158,9 +142,12 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
                     .replace(R.id.filterViewer, mCameraViewerFragment)
                     .commit();
             mFilterViewerMode = FilterViewerMode.CAMERA;
+            mViewerActionBtn.setImageResource(R.drawable.camera_icon);
+            mOpenCameraBtn.setImageResource(R.drawable.switch_camera_icon);
         }
-        else
+        else {
             mCameraViewerFragment.switchCamera();
+        }
     }
 
     private void openPicture() {

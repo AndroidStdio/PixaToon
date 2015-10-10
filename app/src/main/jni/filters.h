@@ -5,4 +5,6 @@ using namespace cv;
 using namespace std;
 
 void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold);
+void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold);
 void quantize(Mat& src, Mat& dst);
+void quantize1(Mat& src, Mat& dst);

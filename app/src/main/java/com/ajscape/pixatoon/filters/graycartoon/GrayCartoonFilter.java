@@ -1,29 +1,29 @@
-package com.ajscape.pixatoon.filters.colorcartoon;
+package com.ajscape.pixatoon.filters.graycartoon;
 
 import android.app.Fragment;
 
-import com.ajscape.pixatoon.filters.Native;
 import com.ajscape.pixatoon.filters.Filter;
 import com.ajscape.pixatoon.filters.FilterType;
+import com.ajscape.pixatoon.filters.Native;
 
 import org.opencv.core.Mat;
 
 /**
  * Created by AtulJadhav on 9/20/2015.
  */
-public class ColorCartoonFilter extends Filter {
+public class GrayCartoonFilter extends Filter {
 
     private int threshold;
     private int thickness;
 
-    public ColorCartoonFilter(FilterType filterType, Fragment configFragment) {
+    public GrayCartoonFilter(FilterType filterType, Fragment configFragment) {
         super(filterType, configFragment);
         resetConfig();
     }
 
     @Override
     public void process(Mat src, Mat dst) {
-        Native.colorCartoonFilter(src.getNativeObjAddr(), dst.getNativeObjAddr(), thickness, threshold);
+        Native.grayCartoonFilter(src.getNativeObjAddr(), dst.getNativeObjAddr(), thickness, threshold);
     }
 
     @Override

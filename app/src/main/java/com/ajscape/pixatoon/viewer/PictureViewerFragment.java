@@ -11,10 +11,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.ajscape.pixatoon.R;
-import com.ajscape.pixatoon.common.Filter;
-import com.ajscape.pixatoon.common.FilterManager;
-import com.ajscape.pixatoon.common.FilterPictureCallback;
-import com.ajscape.pixatoon.viewer.image.PictureUtils;
+import com.ajscape.pixatoon.filters.Filter;
+import com.ajscape.pixatoon.filters.FilterManager;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;

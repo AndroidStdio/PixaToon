@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 import android.os.Bundle;
 import android.app.Fragment;
@@ -14,15 +14,12 @@ import com.ajscape.pixatoon.R;
 public class FilterSelectorFragment extends Fragment implements View.OnClickListener{
 
     private static final String TAG = "FilterSelectorFragment:";
-    private FilterManager filterManager;
     private FilterSelectorListener callback;
-    private Button activeFilerBtn;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         callback = (FilterSelectorListener)getActivity();
-        filterManager = FilterManager.getInstance();
     }
 
     @Override
@@ -33,14 +30,13 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
         view.findViewById(R.id.filterApplyBtn).setOnClickListener(this);
         view.findViewById(R.id.filterCancelBtn).setOnClickListener(this);
         view.findViewById(R.id.colorCartoonFilterBtn).setOnClickListener(this);
-        if(activeFilerBtn!=null)
-            activeFilerBtn.setSelected(true);
+        view.findViewById(R.id.grayCartoonFilterBtn).setOnClickListener(this);
         return view;
     }
 
     @Override
     public void onClick(View v) {
-        Log.d(TAG, "click detected");
+        Log.d(TAG, "click detected - ID=");
         int viewId = v.getId();
         switch(viewId) {
             case R.id.filterApplyBtn:
@@ -51,15 +47,13 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
                 Log.d(TAG,"Cancel Btn clicked");
                 callback.onFilterCancel();
                 return;
-        }
-        FilterType filterType = filterManager.getFilterTypeByBtnId(viewId);
-        if( (activeFilerBtn==null || (activeFilerBtn!=null && viewId!=activeFilerBtn.getId())) && filterType != null) {
-            Log.d(TAG,"Filter Btn clicked");
-            if(activeFilerBtn != null)
-                activeFilerBtn.setSelected(false);
-            activeFilerBtn = (Button)v;
-            activeFilerBtn.setSelected(true);
-            callback.onFilterSelect(filterType);
+            case R.id.colorCartoonFilterBtn:
+                Log.d(TAG,"Color-Cartoon Filter Btn clicked");
+                callback.onFilterSelect(FilterType.COLOR_CARTOON);
+                return;
+            case R.id.grayCartoonFilterBtn:
+                Log.d(TAG, "Color-Cartoon Filter Btn clicked");
+                callback.onFilterSelect(FilterType.GRAY_CARTOON);
         }
     }
 }

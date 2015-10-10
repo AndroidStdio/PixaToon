@@ -1,8 +1,10 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 /**
  * Created by AtulJadhav on 9/21/2015.
  */
 public class Native {
     public static native void colorCartoonFilter(long srcMatAddr, long dstMatAddr, int thickness, int threshold);
+
+    public static native void grayCartoonFilter(long srcMatAddr, long dstMatAddr, int thickness, int threshold);
 }

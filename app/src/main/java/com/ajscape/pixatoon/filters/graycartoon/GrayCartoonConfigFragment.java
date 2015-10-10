@@ -1,7 +1,7 @@
-package com.ajscape.pixatoon.filters.colorcartoon;
+package com.ajscape.pixatoon.filters.graycartoon;
 
-import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,24 +11,24 @@ import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.FilterConfigListener;
 import com.ajscape.pixatoon.filters.FilterManager;
 
-public class ColorCartoonConfigFragment extends Fragment {
+public class GrayCartoonConfigFragment extends Fragment {
 
     private FilterConfigListener callback;
     private SeekBar thicknessSeekBar, thresholdSeekBar;
-    private ColorCartoonFilter filter;
+    private GrayCartoonFilter filter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         callback = (FilterConfigListener)getActivity();
-        filter = (ColorCartoonFilter)FilterManager.getInstance().getCurrentFilter();
+        filter = (GrayCartoonFilter)FilterManager.getInstance().getCurrentFilter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(com.ajscape.pixatoon.R.layout.fragment_filterconfig_colorcartoon, container, false);
+        View view =  inflater.inflate(R.layout.fragment_filterconfig_graycartoon, container, false);
         initializeSeekbars(view);
         return view;
     }

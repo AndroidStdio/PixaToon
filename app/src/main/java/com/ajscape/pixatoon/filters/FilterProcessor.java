@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 import org.opencv.core.Mat;
 
@@ -37,26 +37,27 @@ public class FilterProcessor {
             mFilteredMatQueue.remove();
         mInputMode = !mInputMode;
     }
+
+    static class FilterProcessorThread extends Thread {
+        private Filter mFilter;
+        private Mat mSrcMat;
+        private Mat mDstMat;
+        private boolean mInputMode;
+        private FilterProcessor mProcessor;
+
+        public FilterProcessorThread(FilterProcessor processor, Filter filter, Mat srcMat, Mat dstMat, boolean inputMode) {
+            mProcessor = processor;
+            mFilter = filter;
+            mSrcMat = srcMat;
+            mDstMat = dstMat;
+            mInputMode = inputMode;
+        }
+
+        @Override
+        public void run() {
+            mFilter.process(mSrcMat, mDstMat);
+            mProcessor.enqueueFilteredMat(mDstMat, mInputMode);
+        }
+    }
 }
 
-class FilterProcessorThread extends Thread {
-    private Filter mFilter;
-    private Mat mSrcMat;
-    private Mat mDstMat;
-    private boolean mInputMode;
-    private FilterProcessor mProcessor;
-
-    public FilterProcessorThread(FilterProcessor processor, Filter filter, Mat srcMat, Mat dstMat, boolean inputMode) {
-        mProcessor = processor;
-        mFilter = filter;
-        mSrcMat = srcMat;
-        mDstMat = dstMat;
-        mInputMode = inputMode;
-    }
-
-    @Override
-    public void run() {
-        mFilter.process(mSrcMat, mDstMat);
-        mProcessor.enqueueFilteredMat(mDstMat, mInputMode);
-    }
-}

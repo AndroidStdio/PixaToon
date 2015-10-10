@@ -1,6 +1,4 @@
-package com.ajscape.pixatoon.common;
-
-import com.ajscape.pixatoon.common.FilterType;
+package com.ajscape.pixatoon.filters;
 
 /**
  * Created by AtulJadhav on 9/29/2015.

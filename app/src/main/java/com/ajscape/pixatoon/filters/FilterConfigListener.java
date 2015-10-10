@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 /**
  * Created by AtulJadhav on 9/29/2015.

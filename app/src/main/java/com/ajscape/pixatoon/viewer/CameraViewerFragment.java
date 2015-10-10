@@ -12,9 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ajscape.pixatoon.R;
-import com.ajscape.pixatoon.common.FilterManager;
-import com.ajscape.pixatoon.common.FilterPictureCallback;
-import com.ajscape.pixatoon.viewer.camera.OpenCvCameraView;
+import com.ajscape.pixatoon.filters.FilterManager;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;

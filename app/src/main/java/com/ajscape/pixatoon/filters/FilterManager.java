@@ -1,18 +1,17 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 import android.app.Application;
 
 import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonFilter;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonConfigFragment;
+import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonConfigFragment;
+import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonFilter;
 
 import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * Created by AtulJadhav on 9/20/2015.
@@ -22,7 +21,6 @@ public class FilterManager extends Application {
 
     private ArrayList<Filter> mFilterList;
     private HashMap<FilterType, Filter> mFilterType2FilterMap;
-    private HashMap<Integer, FilterType> mBtnId2FilterTypeMap;
     private Filter mCurrentFilter;
     private Filter mLastAppliedFilter;
     private FilterSelectorFragment mFilterSelectorFragment;
@@ -39,7 +37,6 @@ public class FilterManager extends Application {
     private FilterManager() {
         mFilterList = new ArrayList<>();
         mFilterType2FilterMap = new HashMap<>();
-        mBtnId2FilterTypeMap = new HashMap<>();
         mFilterSelectorFragment = new FilterSelectorFragment();
         mFilterProcessor = new FilterProcessor(true);
 
@@ -49,15 +46,17 @@ public class FilterManager extends Application {
         // hash filters to maps for easy retreival
         for( Filter filter : mFilterList) {
             mFilterType2FilterMap.put( filter.getType(), filter);
-            mBtnId2FilterTypeMap.put( filter.getFilterSelectorBtnId(), filter.getType());
         }
     }
 
     private void buildFilterList() {
         mFilterList.add( new ColorCartoonFilter(
                 FilterType.COLOR_CARTOON,
-                new ColorCartoonConfigFragment(),
-                R.id.colorCartoonFilterBtn) );
+                new ColorCartoonConfigFragment()) );
+
+        mFilterList.add( new GrayCartoonFilter(
+                FilterType.GRAY_CARTOON,
+                new GrayCartoonConfigFragment()) );
     }
 
     public Filter getCurrentFilter() {
@@ -70,8 +69,6 @@ public class FilterManager extends Application {
         else
             srcMat.copyTo(dstMat);
     }
-
-    public FilterSelectorFragment getFilterSelectorFragment() { return mFilterSelectorFragment; }
 
     public void setCurrentFilter(FilterType filterType) {
         mLastAppliedFilter = mCurrentFilter;
@@ -86,14 +83,6 @@ public class FilterManager extends Application {
 
     public void cancelCurrentFilter() {
         mCurrentFilter = mLastAppliedFilter;
-    }
-
-    public Filter getFilterByType(FilterType filterType) {
-        return mFilterType2FilterMap.get(filterType);
-    }
-
-    public FilterType getFilterTypeByBtnId(int filterSelectorBtnId) {
-        return mBtnId2FilterTypeMap.get(filterSelectorBtnId);
     }
 
     public void reset() {

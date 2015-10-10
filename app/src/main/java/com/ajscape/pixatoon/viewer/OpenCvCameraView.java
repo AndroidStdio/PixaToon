@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.viewer.camera;
+package com.ajscape.pixatoon.viewer;
 
 import java.util.List;
 

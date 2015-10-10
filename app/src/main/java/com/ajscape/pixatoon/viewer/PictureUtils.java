@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.viewer.image;
+package com.ajscape.pixatoon.viewer;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;

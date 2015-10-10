@@ -1,12 +1,9 @@
-package com.ajscape.pixatoon.common;
+package com.ajscape.pixatoon.filters;
 
 /**
  * Created by AtulJadhav on 9/21/2015.
  */
 public enum FilterType {
-    NONE,
     COLOR_CARTOON,
-    GRAY_CARTOON,
-    CARTOON,
-    CARTOON2
+    GRAY_CARTOON
 }

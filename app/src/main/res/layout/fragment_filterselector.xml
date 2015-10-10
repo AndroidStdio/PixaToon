@@ -23,6 +23,11 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:text="Color Cartoon" />
+                <Button
+                    android:id="@+id/grayCartoonFilterBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:text="Gray Cartoon" />
             </LinearLayout>
         </HorizontalScrollView>
 
