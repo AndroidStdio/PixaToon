@@ -4,14 +4,14 @@
         <shape
             android:shape="oval"
             xmlns:android="http://schemas.android.com/apk/res/android">
-            <solid android:color="@color/unpressed_btn"/>
+            <solid android:color="@color/background"/>
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape
             android:shape="oval"
             xmlns:android="http://schemas.android.com/apk/res/android">
-            <solid android:color="@color/pressed_btn"/>
+            <solid android:color="@color/foreground"/>
         </shape>
     </item>
 </selector>

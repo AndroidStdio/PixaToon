@@ -5,6 +5,4 @@ package com.ajscape.pixatoon.filters;
  */
 public interface FilterSelectorListener {
     public void onFilterSelect(FilterType filterType);
-    public void onFilterApply();
-    public void onFilterCancel();
 }

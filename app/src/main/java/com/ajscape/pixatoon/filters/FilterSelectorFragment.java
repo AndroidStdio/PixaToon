@@ -27,8 +27,6 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(com.ajscape.pixatoon.R.layout.fragment_filterselector, container, false);
-        view.findViewById(R.id.filterApplyBtn).setOnClickListener(this);
-        view.findViewById(R.id.filterCancelBtn).setOnClickListener(this);
         view.findViewById(R.id.colorCartoonFilterBtn).setOnClickListener(this);
         view.findViewById(R.id.grayCartoonFilterBtn).setOnClickListener(this);
         return view;
@@ -39,14 +37,6 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
         Log.d(TAG, "click detected - ID=");
         int viewId = v.getId();
         switch(viewId) {
-            case R.id.filterApplyBtn:
-                Log.d(TAG,"Select Btn clicked");
-                callback.onFilterApply();
-                return;
-            case R.id.filterCancelBtn:
-                Log.d(TAG,"Cancel Btn clicked");
-                callback.onFilterCancel();
-                return;
             case R.id.colorCartoonFilterBtn:
                 Log.d(TAG,"Color-Cartoon Filter Btn clicked");
                 callback.onFilterSelect(FilterType.COLOR_CARTOON);

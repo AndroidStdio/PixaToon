@@ -22,8 +22,6 @@ public class FilterManager extends Application {
     private ArrayList<Filter> mFilterList;
     private HashMap<FilterType, Filter> mFilterType2FilterMap;
     private Filter mCurrentFilter;
-    private Filter mLastAppliedFilter;
-    private FilterSelectorFragment mFilterSelectorFragment;
     private FilterProcessor mFilterProcessor;
 
     private static FilterManager sInstance;
@@ -37,7 +35,6 @@ public class FilterManager extends Application {
     private FilterManager() {
         mFilterList = new ArrayList<>();
         mFilterType2FilterMap = new HashMap<>();
-        mFilterSelectorFragment = new FilterSelectorFragment();
         mFilterProcessor = new FilterProcessor(true);
 
         // initialize filters and add to list
@@ -71,23 +68,11 @@ public class FilterManager extends Application {
     }
 
     public void setCurrentFilter(FilterType filterType) {
-        mLastAppliedFilter = mCurrentFilter;
         mCurrentFilter = mFilterType2FilterMap.get(filterType);
-    }
-
-    public void applyCurrentFilter() {
-        if(mLastAppliedFilter != null && mLastAppliedFilter != mCurrentFilter)
-            mLastAppliedFilter.resetConfig();
-        mLastAppliedFilter = mCurrentFilter;
-    }
-
-    public void cancelCurrentFilter() {
-        mCurrentFilter = mLastAppliedFilter;
     }
 
     public void reset() {
         mCurrentFilter = null;
-        mLastAppliedFilter = null;
         mFilterProcessor.changeInputMode();
     }
 }
