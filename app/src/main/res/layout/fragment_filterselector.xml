@@ -27,6 +27,11 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:text="Gray Cartoon" />
+                <Button
+                    android:id="@+id/graySketchFilterBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:text="Gray Sketch" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

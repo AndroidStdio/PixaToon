@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.ajscape.pixatoon.R;
 
@@ -26,9 +25,10 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(com.ajscape.pixatoon.R.layout.fragment_filterselector, container, false);
+        View view =  inflater.inflate(R.layout.fragment_filterselector, container, false);
         view.findViewById(R.id.colorCartoonFilterBtn).setOnClickListener(this);
         view.findViewById(R.id.grayCartoonFilterBtn).setOnClickListener(this);
+        view.findViewById(R.id.graySketchFilterBtn).setOnClickListener(this);
         return view;
     }
 
@@ -42,8 +42,12 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
                 callback.onFilterSelect(FilterType.COLOR_CARTOON);
                 return;
             case R.id.grayCartoonFilterBtn:
-                Log.d(TAG, "Color-Cartoon Filter Btn clicked");
+                Log.d(TAG, "Gray-Cartoon Filter Btn clicked");
                 callback.onFilterSelect(FilterType.GRAY_CARTOON);
+                return;
+            case R.id.graySketchFilterBtn:
+                Log.d(TAG, "Gray-Sketch Filter Btn clicked");
+                callback.onFilterSelect(FilterType.GRAY_SKETCH);
         }
     }
 }

@@ -7,6 +7,7 @@ import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonFilter;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonConfigFragment;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonConfigFragment;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonFilter;
+import com.ajscape.pixatoon.filters.graysketch.GraySketchFilter;
 
 import org.opencv.core.Mat;
 
@@ -54,10 +55,18 @@ public class FilterManager extends Application {
         mFilterList.add( new GrayCartoonFilter(
                 FilterType.GRAY_CARTOON,
                 new GrayCartoonConfigFragment()) );
+
+        mFilterList.add( new GraySketchFilter(
+                FilterType.GRAY_SKETCH,
+                null) );
     }
 
     public Filter getCurrentFilter() {
         return mCurrentFilter;
+    }
+
+    public Filter getFilter(FilterType filterType) {
+        return mFilterType2FilterMap.get(filterType);
     }
 
     public void processCurrentFilter(Mat srcMat, Mat dstMat) {

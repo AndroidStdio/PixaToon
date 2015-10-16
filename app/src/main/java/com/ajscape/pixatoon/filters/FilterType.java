@@ -5,5 +5,7 @@ package com.ajscape.pixatoon.filters;
  */
 public enum FilterType {
     COLOR_CARTOON,
-    GRAY_CARTOON
+    GRAY_CARTOON,
+    GRAY_SKETCH,
+    COLOR_SKETCH
 }

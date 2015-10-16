@@ -53,7 +53,14 @@ C:/Users/atuljadhav/AndroidStudioProjects/PixaToon/app/src/main/obj/local/armeab
  C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgproc.hpp \
  C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgproc/imgproc_c.h \
  C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgproc/types_c.h \
- C:/Users/atuljadhav/AndroidStudioProjects/PixaToon/app/src/main/jni/filters.h
+ C:/Users/atuljadhav/AndroidStudioProjects/PixaToon/app/src/main/jni/filters.h \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui/highgui.hpp \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui.hpp \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgcodecs.hpp \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/videoio.hpp \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui/highgui_c.h \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgcodecs/imgcodecs_c.h \
+ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/videoio/videoio_c.h
 
 C:/Users/atuljadhav/Documents/Personal/android/android-ndk-r10e/platforms/android-8/arch-arm/usr/include/jni.h:
 
@@ -162,3 +169,17 @@ C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni
 C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgproc/types_c.h:
 
 C:/Users/atuljadhav/AndroidStudioProjects/PixaToon/app/src/main/jni/filters.h:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui/highgui.hpp:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui.hpp:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgcodecs.hpp:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/videoio.hpp:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/highgui/highgui_c.h:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/imgcodecs/imgcodecs_c.h:
+
+C:/Users/atuljadhav/Documents/Personal/android/OpenCV-android-sdk/sdk/native/jni/include/opencv2/videoio/videoio_c.h:

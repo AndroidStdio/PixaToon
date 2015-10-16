@@ -7,7 +7,8 @@
 #define EDGE_THRESH_MAX 8
 
 /* Color-Cartoon Filter Imaplementation */
-void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) {
+void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) 
+{	
 	// denormalize params
 	edgeThickness = (edgeThickness*(EDGE_THICK_MAX - EDGE_THICK_MIN))/INPUT_MAX + EDGE_THICK_MIN;
 	if(edgeThickness%2 == 0) edgeThickness++;
@@ -31,7 +32,8 @@ void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold
 }
 
 /* Gray-Cartoon Filter Implementation */
-void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) {
+void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) 
+{
 	// denormalize params
 	edgeThickness = (edgeThickness*(EDGE_THICK_MAX - EDGE_THICK_MIN))/INPUT_MAX + EDGE_THICK_MIN;
 	if(edgeThickness%2 == 0) edgeThickness++;
@@ -52,7 +54,8 @@ void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold)
     subtract(dst, ~edges, dst);
 }
 
-void quantize(Mat& src, Mat& dst) {
+void quantize(Mat& src, Mat& dst) 
+{
     uchar steps[4] = {50, 100, 150, 255};
     //uchar step_val[4] = {10, 50, 100, 255};
     uchar step_val[4] = {200, 210, 220, 255};
@@ -68,7 +71,8 @@ void quantize(Mat& src, Mat& dst) {
     LUT(src, table, dst);
 }
 
-void quantize1(Mat& src, Mat& dst) {
+void quantize1(Mat& src, Mat& dst) 
+{
     uchar steps[4] = {50, 100, 150, 255};
     uchar step_val[4] = {10, 50, 100, 255};
     //uchar step_val[4] = {200, 210, 220, 255};
@@ -82,4 +86,62 @@ void quantize1(Mat& src, Mat& dst) {
     } 
     Mat table(1, 256, CV_8U, buffer, sizeof(buffer));
     LUT(src, table, dst);
+}
+
+SketchFilter* SketchFilter::instance = NULL;
+SketchFilter* SketchFilter::getInstance() 
+{
+	if(instance == NULL)
+		instance = new SketchFilter();
+	return instance;
+}
+
+SketchFilter::SketchFilter()
+{	
+	q_steps[0] = 50;
+	q_steps[1] = 100;
+	q_steps[2] = 150;
+	q_steps[3] = 255;
+}
+
+void SketchFilter::setSketchTextures(Mat& dark_t, Mat& medium_t, Mat& light_t)
+{
+	textures[0] = dark_t;
+	textures[1] = medium_t;
+	textures[2] = light_t;
+}
+
+void SketchFilter::applyGraySketch(Mat& src, Mat& dst)
+{
+	Mat src_blurred, src_gray, edges, dst_gray;
+	GaussianBlur(src, src_blurred, Size(5,5),0);
+	cvtColor(src_blurred, src_gray, CV_RGBA2GRAY);
+	
+	dst_gray.create(src_gray.size(), src_gray.type());
+	for(int row=0; row<src.rows; row++)
+		for(int col=0; col<src.cols; col++)
+		{
+			uchar src_pixel, dst_pixel;
+			src_pixel = src_gray.at<uchar>(row,col);
+			
+            int t_row = row % textures[0].rows;
+            int t_col = col % textures[0].cols;
+
+            if(src_pixel <= q_steps[0])
+				dst_pixel = textures[0].at<uchar>(t_row, t_col);
+			else if(src_pixel <= q_steps[1])
+				dst_pixel = textures[1].at<uchar>(t_row, t_col);
+			else if(src_pixel <= q_steps[2])
+				dst_pixel = textures[2].at<uchar>(t_row, t_col);
+			else if(src_pixel <= q_steps[3])
+				dst_pixel = 255;
+			
+			dst_gray.at<uchar>(row,col) = dst_pixel;
+		}
+	cvtColor(dst_gray, dst, CV_GRAY2RGBA);
+}
+
+void SketchFilter::applyColorSketch(Mat& src, Mat& dst)
+{
+	//todo
 }

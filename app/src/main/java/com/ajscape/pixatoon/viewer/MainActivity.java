@@ -2,6 +2,7 @@ package com.ajscape.pixatoon.viewer;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -139,11 +140,11 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
             mFilterViewerMode = FilterViewerMode.PICTURE;
             mViewerActionBtn.setImageResource(R.drawable.save_icon);
             mOpenCameraBtn.setImageResource(R.drawable.camera_icon);
-            if(mFilterManager.getCurrentFilter()==null)
-                mViewerActionBtn.setVisibility(View.INVISIBLE);
         } else {
             mPictureViewerFragment.loadPicture(pictureFilePath);
         }
+        if(mFilterManager.getCurrentFilter()==null)
+            mViewerActionBtn.setVisibility(View.INVISIBLE);
     }
 
     private void openCameraFilterViewer() {
@@ -156,8 +157,6 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
             mFilterViewerMode = FilterViewerMode.CAMERA;
             mViewerActionBtn.setImageResource(R.drawable.camera_icon);
             mOpenCameraBtn.setImageResource(R.drawable.switch_camera_icon);
-            if(mFilterManager.getCurrentFilter()==null)
-                mViewerActionBtn.setVisibility(View.INVISIBLE);
         }
         else {
             boolean switched = mCameraViewerFragment.switchCamera();
@@ -165,6 +164,8 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
                 Toast.makeText(getApplicationContext(), "Front camera not detected", Toast.LENGTH_SHORT).show();
             }
         }
+        if(mFilterManager.getCurrentFilter()==null)
+            mViewerActionBtn.setVisibility(View.INVISIBLE);
     }
 
     private void openPicture() {

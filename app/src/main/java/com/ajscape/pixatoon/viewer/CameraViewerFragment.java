@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 
 import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.FilterManager;
+import com.ajscape.pixatoon.filters.FilterType;
+import com.ajscape.pixatoon.filters.graysketch.GraySketchFilter;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -44,6 +46,12 @@ public class CameraViewerFragment extends Fragment implements CvCameraViewListen
                     // Load native library after(!) OpenCV initialization
                     System.loadLibrary("image_filters");
                     mCameraView.enableView();
+                    ((GraySketchFilter)mFilterManager.getFilter(FilterType.GRAY_SKETCH)).loadSketchTextures(
+                            getActivity().getApplicationContext().getResources(),
+                            R.drawable.sketch_dark,
+                            R.drawable.sketch_medium,
+                            R.drawable.sketch_light );
+
                 } break;
                 default:
                 {

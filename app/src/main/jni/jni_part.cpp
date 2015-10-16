@@ -15,4 +15,16 @@ JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_grayCartoonFilte
 	grayCartoonFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)thickness, (int)threshold);
 }
 
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_setSketchTextures(JNIEnv* env, jobject, jlong addrDarkTex, jlong addrMediumTex, jlong addrLightTex)
+{ 
+	SketchFilter* sketchFilter =  SketchFilter::getInstance();
+	sketchFilter->setSketchTextures(*(Mat*)addrDarkTex, *(Mat*)addrMediumTex, *(Mat*)addrLightTex);
+}
+
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_graySketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint thickness, jint threshold)
+{ 
+	SketchFilter* sketchFilter =  SketchFilter::getInstance();
+	sketchFilter->applyGraySketch(*(Mat*)addrSrc, *(Mat*)addrDst);
+}
+
 }
