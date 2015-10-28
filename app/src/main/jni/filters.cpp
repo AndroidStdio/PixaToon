@@ -1,18 +1,30 @@
 #include "filters.h"
 
 #define INPUT_MAX 100
-#define EDGE_THICK_MIN 3
-#define EDGE_THICK_MAX 201
-#define EDGE_THRESH_MIN 1
-#define EDGE_THRESH_MAX 8
+
+#define CARTOON_THICK_MIN 3
+#define CARTOON_THICK_MAX 201
+#define CARTOON_THRESH_MIN 1
+#define CARTOON_THRESH_MAX 9
+
+#define SKETCH_BLUR_MIN 3
+#define SKETCH_BLUR_MAX 51
+#define SKETCH_CONTRAST_MIN 1.0
+#define SKETCH_CONTRAST_MAX 10.0 
+
+#define OILPAINT_RADIUS_MIN 1
+#define OILPAINT_RADIUS_MAX 10
+#define OILPAINT_LEVELS_MIN 5
+#define OILPAINT_LEVELS_MAX 30
+
 
 /* Color-Cartoon Filter Imaplementation */
 void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) 
 {	
 	// denormalize params
-	edgeThickness = (edgeThickness*(EDGE_THICK_MAX - EDGE_THICK_MIN))/INPUT_MAX + EDGE_THICK_MIN;
+	edgeThickness = (edgeThickness*(CARTOON_THICK_MAX - CARTOON_THICK_MIN))/INPUT_MAX + CARTOON_THICK_MIN;
 	if(edgeThickness%2 == 0) edgeThickness++;
-	edgeThreshold = (edgeThreshold*(EDGE_THRESH_MAX - EDGE_THRESH_MIN))/INPUT_MAX + EDGE_THRESH_MIN;
+	edgeThreshold = (edgeThreshold*(CARTOON_THRESH_MAX - CARTOON_THRESH_MIN))/INPUT_MAX + CARTOON_THRESH_MIN;
 	
     Mat src_blurred, src_gray, quantized, edges;
     // Denoise image
@@ -35,9 +47,9 @@ void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold
 void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) 
 {
 	// denormalize params
-	edgeThickness = (edgeThickness*(EDGE_THICK_MAX - EDGE_THICK_MIN))/INPUT_MAX + EDGE_THICK_MIN;
+	edgeThickness = (edgeThickness*(CARTOON_THICK_MAX - CARTOON_THICK_MIN))/INPUT_MAX + CARTOON_THICK_MIN;
 	if(edgeThickness%2 == 0) edgeThickness++;
-	edgeThreshold = (edgeThreshold*(EDGE_THRESH_MAX - EDGE_THRESH_MIN))/INPUT_MAX + EDGE_THRESH_MIN;
+	edgeThreshold = (edgeThreshold*(CARTOON_THRESH_MAX - CARTOON_THRESH_MIN))/INPUT_MAX + CARTOON_THRESH_MIN;
 	
     Mat src_blurred, src_gray, quantized, edges;
     // Denoise image
@@ -144,4 +156,162 @@ void SketchFilter::applyGraySketch(Mat& src, Mat& dst)
 void SketchFilter::applyColorSketch(Mat& src, Mat& dst)
 {
 	//todo
+}
+
+void pencilSketchFilter(Mat& src, Mat& dst, int blurRadius, int contrast)
+{
+	// denormalize params
+	blurRadius = (blurRadius*(SKETCH_BLUR_MAX - SKETCH_BLUR_MIN))/INPUT_MAX + SKETCH_BLUR_MIN;
+	if(blurRadius%2 == 0) blurRadius++;
+	float contrast1 = (float)(contrast*(SKETCH_CONTRAST_MAX - SKETCH_CONTRAST_MIN))/(float)INPUT_MAX + SKETCH_CONTRAST_MIN;
+	
+	Mat src_gray, dst_gray, blend;
+    cvtColor(src, src_gray, CV_RGBA2GRAY);
+    GaussianBlur(src_gray, src_gray, Size(3,3), 0);
+    blend = ~src_gray;
+    GaussianBlur(blend, blend, Size(blurRadius,blurRadius), 0);
+    colorDodgeBlend(src_gray, blend, dst_gray);
+    dst_gray = ~(contrast1*(~dst_gray));
+	cvtColor(dst_gray, dst, CV_GRAY2RGBA);
+}
+
+void colorDodgeBlend(Mat& src, Mat& blend, Mat& dst)
+{
+	dst.create(src.size(), src.type());
+    for(int i=0; i< src.rows; i++) 
+        for(int j=0; j< src.cols; j++) {
+            
+            if(src.channels() >= 3) {
+                Vec3b srcPixel, dstPixel, blendPixel;
+                srcPixel = src.at<Vec3b>(i,j);
+                blendPixel = blend.at<Vec3b>(i,j);
+
+                dstPixel.val[0] = (blendPixel.val[0] >= 255)? 255: min(255, (srcPixel.val[0]*255)/(255-blendPixel.val[0]));
+                dstPixel.val[1] = (blendPixel.val[1] >= 255)? 255: min(255, (srcPixel.val[1]*255)/(255-blendPixel.val[1]));
+                dstPixel.val[2] = (blendPixel.val[2] >= 255)? 255: min(255, (srcPixel.val[2]*255)/(255-blendPixel.val[2]));
+
+                dst.at<Vec3b>(i,j) = dstPixel;
+            }
+            else if(src.channels() == 1) {
+                uchar srcPixel, dstPixel, blendPixel;
+                srcPixel = src.at<uchar>(i,j);
+                blendPixel = blend.at<uchar>(i,j);
+
+                //dstPixel = srcPixel + (uchar)( (255.0 - srcPixel) * (blendPixel/255.0) );
+                dstPixel = (blendPixel >= 255)? 255: min(255, (srcPixel*255)/(255-blendPixel));
+
+                dst.at<uchar>(i,j) = dstPixel;
+            }
+        }
+}
+
+void oilPaintFilter(Mat& src1, Mat& dst1, int radius, int levels) 
+{	
+	// denormalize params
+	radius = (radius*(OILPAINT_RADIUS_MAX - OILPAINT_RADIUS_MIN))/INPUT_MAX + OILPAINT_RADIUS_MIN;
+	levels = (levels*(OILPAINT_LEVELS_MAX - OILPAINT_LEVELS_MIN))/INPUT_MAX + OILPAINT_LEVELS_MIN;
+	
+    int intensity_hist[levels], total_red[levels], total_green[levels], total_blue[levels];
+	Mat src,dst;
+	cvtColor(src1, src, CV_RGBA2RGB);
+	
+	dst.create(src.size(), src.type());
+    for(int row=0; row<src.rows; ++row) 
+    {
+        for(int i=0; i<levels; i++)
+            intensity_hist[i] = total_red[i] = total_green[i] = total_blue[i] = 0;
+
+		Vec3b *dst_rptr = dst.ptr<Vec3b>(row);
+        int k_row_min = ((row-radius) < 0) ? 0:(row-radius);
+        int k_row_max = ((row+radius) >= src.rows) ? (src.rows-1):(row+radius);
+
+        for(int k_row=k_row_min; k_row<=k_row_max; ++k_row) 
+        {
+            Vec3b *src_rptr = src.ptr<Vec3b>(k_row);
+            for(int k_col=0; k_col<radius; ++k_col) 
+            {
+                Vec3b pix = src_rptr[k_col];
+                int red = (int)pix.val[0];
+                int green = (int)pix.val[1];
+                int blue = (int)pix.val[2];
+
+                int level = ((red+green+blue)*levels)/768;
+                intensity_hist[level]++;
+                total_red[level] += red;
+                total_green[level] += green;
+                total_blue[level] += blue;
+            }
+        }
+		
+        for(int col=0; col<src.cols; ++col)
+        {
+            for(int k_row=k_row_min; k_row<=k_row_max; ++k_row) 
+            {
+                Vec3b *src_rptr = src.ptr<Vec3b>(k_row);
+
+                if(col-radius >= 0) {
+                    Vec3b pix = src_rptr[col-radius];
+                    int red = (int)pix.val[0];
+                    int green = (int)pix.val[1];
+                    int blue = (int)pix.val[2];
+
+                    int level = ((red+green+blue)*levels)/768;
+                    intensity_hist[level]--;
+                    total_red[level] -= red;
+                    total_green[level] -= green;
+                    total_blue[level] -= blue;
+                }
+
+                if(col+radius < src.cols) {
+                    Vec3b pix = src_rptr[col+radius];
+                    int red = (int)pix.val[0];
+                    int green = (int)pix.val[1];
+                    int blue = (int)pix.val[2];
+
+                    int level = ((red+green+blue)*levels)/768;
+                    intensity_hist[level]++;
+                    total_red[level] += red;
+                    total_green[level] += green;
+                    total_blue[level] += blue;
+                }
+            }
+
+            Vec3b dst_pix;
+            int max_level, max_intensity = 0;
+            for(int i=0; i<levels; i++)
+                if(intensity_hist[i]>max_intensity) {
+                    max_intensity = intensity_hist[i];
+                    max_level = i;
+                }
+
+            dst_pix.val[0] = (uchar)(total_red[max_level] / intensity_hist[max_level]);
+            dst_pix.val[1] = (uchar)(total_green[max_level] / intensity_hist[max_level]);
+            dst_pix.val[2] = (uchar)(total_blue[max_level] / intensity_hist[max_level]);
+            dst_rptr[col] = dst_pix;
+        }
+    }
+	cvtColor(dst, dst1, CV_RGB2RGBA);
+}
+
+void waterColorFilter(Mat& src, Mat& dst, int spatialRadius, int colorRadius, int maxLevels, int scaleFactor) {
+	spatialRadius = spatialRadius/4;
+	colorRadius = colorRadius/2;
+	maxLevels = maxLevels/10;
+	double scaleFactor1 = scaleFactor*0.01;
+	
+	Mat src_blur, dst1;
+    GaussianBlur(src, src_blur, Size(3,3), 0);
+	cvtColor(src_blur, src_blur, CV_RGBA2RGB);
+	//src_blur = 1.5*src_blur - 50;
+	
+	if(scaleFactor1 < 0.95) {
+		resize(src_blur, src_blur, Size(), scaleFactor1, scaleFactor1, INTER_LINEAR);
+		pyrMeanShiftFiltering(src_blur, dst1, spatialRadius, colorRadius, maxLevels);
+		resize(dst1, dst1, src.size(), 0, 0, INTER_CUBIC);
+	}
+	else {
+		pyrMeanShiftFiltering(src_blur, dst1, spatialRadius, colorRadius, maxLevels);
+	} 
+	
+	cvtColor(dst1, dst, CV_RGB2RGBA);
 }

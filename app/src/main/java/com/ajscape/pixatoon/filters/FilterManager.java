@@ -8,6 +8,12 @@ import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonConfigFragment;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonConfigFragment;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonFilter;
 import com.ajscape.pixatoon.filters.graysketch.GraySketchFilter;
+import com.ajscape.pixatoon.filters.oilpaint.OilPaintConfigFragment;
+import com.ajscape.pixatoon.filters.oilpaint.OilPaintFilter;
+import com.ajscape.pixatoon.filters.pencilsketch.PencilSketchConfigFragment;
+import com.ajscape.pixatoon.filters.pencilsketch.PencilSketchFilter;
+import com.ajscape.pixatoon.filters.watercolor.WaterColorConfigFragment;
+import com.ajscape.pixatoon.filters.watercolor.WaterColorFilter;
 
 import org.opencv.core.Mat;
 
@@ -59,6 +65,18 @@ public class FilterManager extends Application {
         mFilterList.add( new GraySketchFilter(
                 FilterType.GRAY_SKETCH,
                 null) );
+
+        mFilterList.add( new PencilSketchFilter(
+                FilterType.PENCIL_SKETCH,
+                new PencilSketchConfigFragment()) );
+
+        mFilterList.add( new OilPaintFilter(
+                FilterType.OIL_PAINT,
+                new OilPaintConfigFragment()) );
+
+        mFilterList.add( new WaterColorFilter(
+                FilterType.WATER_COLOR,
+                new WaterColorConfigFragment()) );
     }
 
     public Filter getCurrentFilter() {

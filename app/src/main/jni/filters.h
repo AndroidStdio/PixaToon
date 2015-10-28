@@ -7,6 +7,10 @@ using namespace std;
 
 void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold);
 void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold);
+void pencilSketchFilter(Mat& src, Mat& dst, int blurRadius, int contrast);
+void oilPaintFilter(Mat& src, Mat& dst, int radius, int levels);
+void waterColorFilter(Mat& src, Mat& dst, int spatialRadius, int colorRadius, int maxLevels, int scaleFactor);
+void colorDodgeBlend(Mat& src, Mat& blend, Mat& dst);
 void quantize(Mat& src, Mat& dst);
 void quantize1(Mat& src, Mat& dst);
 

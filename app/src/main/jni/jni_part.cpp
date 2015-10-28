@@ -27,4 +27,19 @@ JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_graySketchFilter
 	sketchFilter->applyGraySketch(*(Mat*)addrSrc, *(Mat*)addrDst);
 }
 
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_pencilSketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint blurRadius, jint contrast)
+{ 
+	pencilSketchFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)blurRadius, (int)contrast);
+}
+
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_oilPaintFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint radius, jint levels)
+{ 
+	oilPaintFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)radius, (int)levels);
+}
+
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_waterColorFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint spatialRadius, jint colorRadius, jint maxLevels, jint scaleFactor) 
+{
+	waterColorFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)spatialRadius, (int)colorRadius, (int)maxLevels, (int)scaleFactor);
+}
+
 }

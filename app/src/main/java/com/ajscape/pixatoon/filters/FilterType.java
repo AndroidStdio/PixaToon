@@ -7,5 +7,7 @@ public enum FilterType {
     COLOR_CARTOON,
     GRAY_CARTOON,
     GRAY_SKETCH,
-    COLOR_SKETCH
+    PENCIL_SKETCH,
+    OIL_PAINT,
+    WATER_COLOR
 }
