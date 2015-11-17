@@ -1,5 +1,7 @@
 package com.ajscape.pixatoon.viewer;
 
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
@@ -11,21 +13,24 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.List;
-
 /**
- * Created by AtulJadhav on 9/20/2015.
+ * This class is an implementation of the Bridge View between OpenCV and Java Camera.
+ * This class relays on the functionality available in base class and only implements
+ * required functions:
+ * connectCamera - opens Java camera and sets the PreviewCallback to be delivered.
+ * disconnectCamera - closes the camera and stops preview.
+ * When frame is delivered via callback from Camera - it processed via OpenCV to be
+ * converted to RGBA32 and then passed to the external callback for modifications if required.
  */
 public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCallback, Camera.PictureCallback {
 
     private static final int MAGIC_TEXTURE_ID = 10;
-    private static final String TAG = "JavaCameraView";
+    private static final String TAG = "OpenCvCameraView2";
 
     private byte mBuffer[];
     private Mat[] mFrameChain;
@@ -148,9 +153,7 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
                     Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
 
                     params.setPreviewFormat(ImageFormat.NV21);
-                    Log.d(TAG, "Set preview size to " + Integer.valueOf((int) frameSize.width) + "x" + Integer.valueOf((int) frameSize.height));
-                    mCamera.setDisplayOrientation(90);
-                    params.set("orientation", "portrait");
+                    Log.d(TAG, "Set preview size to " + Integer.valueOf((int)frameSize.width) + "x" + Integer.valueOf((int)frameSize.height));
                     params.setPreviewSize((int)frameSize.width, (int)frameSize.height);
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !android.os.Build.MODEL.equals("GT-I9100"))
@@ -199,6 +202,8 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
                         mCamera.setPreviewTexture(mSurfaceTexture);
                     } else
                         mCamera.setPreviewDisplay(null);
+
+                    mCamera.setDisplayOrientation(90);
 
                     /* Finally we are ready to start the preview */
                     Log.d(TAG, "startPreview");
@@ -297,8 +302,8 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
         if (mCamera != null)
             mCamera.addCallbackBuffer(mBuffer);
     }
-	
-	public void takePicture() {
+
+    public void takePicture() {
         if(mPictureCallback == null) {
             String errorMsg = "Picture Callback should be set before taking picture";
             Log.e(TAG, errorMsg);

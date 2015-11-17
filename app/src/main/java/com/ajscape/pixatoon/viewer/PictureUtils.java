@@ -19,46 +19,28 @@ import java.io.OutputStream;
 public class PictureUtils {
     public static final String TAG = "PictureUtils:";
 
-    public static Bitmap decodeSampledBitmapFromFile(String imgPath, int reqWidth, int reqHeight) {
+    public static Bitmap resizeBitmap(Bitmap bitmap, int maxWidth, int maxHeight) {
+        if (maxHeight > 0 && maxWidth > 0) {
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            float ratioBitmap = (float) width / (float) height;
+            float ratioMax = (float) maxWidth / (float) maxHeight;
 
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imgPath, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(imgPath, options);
-    }
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
+            int finalWidth = maxWidth;
+            int finalHeight = maxHeight;
+            if (ratioMax > ratioBitmap) {
+                finalWidth = (int) ((float)maxHeight * ratioBitmap);
+            } else {
+                finalHeight = (int) ((float)maxWidth / ratioBitmap);
             }
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
+            return scaledBitmap;
+        } else {
+            return bitmap;
         }
-
-        return inSampleSize;
     }
 
-    public static String saveBitmap(ContentResolver cr,Bitmap pictureBitmap) throws IOException {
+    public static String saveBitmap(ContentResolver cr,Bitmap bitmap) throws IOException {
         String path = Environment.getExternalStorageDirectory().toString();
         OutputStream fOut = null;
         String savedFilePath = path+ "/Pixatoon/test.jpg";
@@ -69,7 +51,7 @@ public class PictureUtils {
                 file.createNewFile();
             fOut = new FileOutputStream(file);
 
-            pictureBitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fOut); // saving the Bitmap to a file compressed as a JPEG with 85% compression rate
             fOut.close(); // do not forget to close the stream
 
             MediaStore.Images.Media.insertImage(cr, file.getAbsolutePath(), file.getName(), file.getName());
