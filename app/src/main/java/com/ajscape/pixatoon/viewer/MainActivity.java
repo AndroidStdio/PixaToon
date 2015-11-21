@@ -58,7 +58,11 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_main);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        setContentView(R.layout.activity_main2);
 
         mFilterManager = FilterManager.getInstance();
         mCameraViewerFragment = new CameraViewerFragment();
@@ -84,8 +88,8 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
                 .beginTransaction()
                 .add(R.id.filterViewer, mCameraViewerFragment)
                 .commit();
-        if(mFilterManager.getCurrentFilter()==null)
-            mViewerActionBtn.setVisibility(View.INVISIBLE);
+//        if(mFilterManager.getCurrentFilter()==null)
+//            mViewerActionBtn.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -128,6 +132,10 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
     }
 
     private void openPictureFilterViewer(String pictureFilePath) {
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+
         if(mFilterViewerMode != FilterViewerMode.PICTURE) {
             mFilterManager.reset();
             Bundle args = new Bundle();
@@ -143,8 +151,8 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
         } else {
             mPictureViewerFragment.loadPicture(pictureFilePath);
         }
-        if(mFilterManager.getCurrentFilter()==null)
-            mViewerActionBtn.setVisibility(View.INVISIBLE);
+//        if(mFilterManager.getCurrentFilter()==null)
+//            mViewerActionBtn.setVisibility(View.INVISIBLE);
     }
 
     private void openCameraFilterViewer() {
@@ -164,8 +172,8 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
                 Toast.makeText(getApplicationContext(), "Front camera not detected", Toast.LENGTH_SHORT).show();
             }
         }
-        if(mFilterManager.getCurrentFilter()==null)
-            mViewerActionBtn.setVisibility(View.INVISIBLE);
+//        if(mFilterManager.getCurrentFilter()==null)
+//            mViewerActionBtn.setVisibility(View.INVISIBLE);
     }
 
     private void openPicture() {
@@ -201,7 +209,7 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void openFilterSelector() {
         if(!mFilterSelectorFragment.isVisible()) {
-            mViewerActionBtn.setVisibility(View.INVISIBLE);
+            //mViewerActionBtn.setVisibility(View.INVISIBLE);
             getFragmentManager()
                     .beginTransaction()
                     .add(R.id.filterSelectorPanel, mFilterSelectorFragment)
@@ -212,7 +220,7 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void closeFilterSelector() {
         if(mFilterSelectorFragment.isVisible()) {
-            mViewerActionBtn.setVisibility(View.VISIBLE);
+            //mViewerActionBtn.setVisibility(View.VISIBLE);
             getFragmentManager()
                     .beginTransaction()
                     .remove(mFilterSelectorFragment)
@@ -240,7 +248,7 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void openCurrentFilterConfig() {
         if (mFilterManager.getCurrentFilter()!=null && !isFilterConfigVisible()) {
-            mViewerActionBtn.setVisibility(View.INVISIBLE);
+            //mViewerActionBtn.setVisibility(View.INVISIBLE);
             mFilterConfigFragment = mFilterManager.getCurrentFilter().getConfigFragment();
             getFragmentManager()
                     .beginTransaction()
@@ -252,7 +260,7 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void closeCurrentFilterConfig() {
         if (isFilterConfigVisible()) {
-            mViewerActionBtn.setVisibility(View.VISIBLE);
+            //mViewerActionBtn.setVisibility(View.VISIBLE);
             getFragmentManager()
                     .beginTransaction()
                     .remove(mFilterConfigFragment)

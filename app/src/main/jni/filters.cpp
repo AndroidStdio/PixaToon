@@ -27,6 +27,7 @@ void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold
 	edgeThreshold = (edgeThreshold*(CARTOON_THRESH_MAX - CARTOON_THRESH_MIN))/INPUT_MAX + CARTOON_THRESH_MIN;
 	
     Mat src_blurred, src_gray, quantized, edges;
+
     // Denoise image
     GaussianBlur(src, src_blurred, Size(5,5), 0);
     // Get src image grayscale
@@ -35,7 +36,8 @@ void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold
     quantize(src_gray, quantized);
 	cvtColor(quantized, dst, CV_GRAY2RGBA);
     // superimpose gray shades on color src img
-    subtract(src_blurred, ~dst, dst);
+    //subtract(src_blurred, ~dst, dst);
+    add(0.7*src_blurred,0.7*dst,dst);
     // get illumination-resistant edges by adaptive thresholding
     adaptiveThreshold(src_gray, src_gray, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, edgeThickness, edgeThreshold);
     cvtColor(src_gray, edges, CV_GRAY2RGBA);
@@ -66,11 +68,42 @@ void grayCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold)
     subtract(dst, ~edges, dst);
 }
 
+void getQuantizeSteps(Mat& src, float* prob_arr, int num_steps, uchar* steps) {
+    Mat hist;
+    int histSize = 256;
+
+    float range[] = { 0, 256 } ;
+    const float* histRange = { range };
+
+    calcHist(&src, 1, 0, Mat(), hist, 1, &histSize, &histRange, true, false);
+
+    float sum_hist = 0.0f;
+    for(int i=0; i<histSize; i++)
+        sum_hist += hist.at<float>(i,0);
+    hist = hist/sum_hist;
+
+    float step_prob = 0.0f;
+    int step_index = 0;
+    for(int i=0; i<histSize; i++) {
+        step_prob += hist.at<float>(i,0);
+        if(step_prob >= prob_arr[step_index]) {
+            steps[step_index++]=i;
+            step_prob = 0.0f;
+        }
+    }
+    for(int i=step_index; i<num_steps; i++)
+        steps[i] = 255;
+}
+
 void quantize(Mat& src, Mat& dst) 
 {
-    uchar steps[4] = {50, 100, 150, 255};
-    //uchar step_val[4] = {10, 50, 100, 255};
-    uchar step_val[4] = {200, 210, 220, 255};
+    //uchar steps[4] = {50, 100, 150, 255};
+    //uchar step_val[4] = {200, 210, 220, 255};
+    uchar steps[4];
+    float step_prob[] = { 0.1f, 0.2f, 0.2f, 0.5f};
+    getQuantizeSteps(src, step_prob, 4, steps);
+
+    uchar step_val[] = {0, 30, 50, 100};
 
     uchar buffer[256];
     int j=0;
@@ -85,7 +118,11 @@ void quantize(Mat& src, Mat& dst)
 
 void quantize1(Mat& src, Mat& dst) 
 {
-    uchar steps[4] = {50, 100, 150, 255};
+    //uchar steps[4] = {50, 100, 150, 255};
+    uchar steps[4];
+    float step_prob[] = { 0.1f, 0.2f, 0.2f, 0.5f};
+    getQuantizeSteps(src, step_prob, 4, steps);
+
     uchar step_val[4] = {10, 50, 100, 255};
     //uchar step_val[4] = {200, 210, 220, 255};
 
@@ -168,8 +205,7 @@ void pencilSketchFilter(Mat& src, Mat& dst, int blurRadius, int contrast)
 	Mat src_gray, dst_gray, blend;
     cvtColor(src, src_gray, CV_RGBA2GRAY);
     GaussianBlur(src_gray, src_gray, Size(3,3), 0);
-    blend = ~src_gray;
-    GaussianBlur(blend, blend, Size(blurRadius,blurRadius), 0);
+    GaussianBlur(~src_gray, blend, Size(blurRadius,blurRadius), 0);
     colorDodgeBlend(src_gray, blend, dst_gray);
     dst_gray = ~(contrast1*(~dst_gray));
 	cvtColor(dst_gray, dst, CV_GRAY2RGBA);
@@ -177,30 +213,19 @@ void pencilSketchFilter(Mat& src, Mat& dst, int blurRadius, int contrast)
 
 void colorDodgeBlend(Mat& src, Mat& blend, Mat& dst)
 {
-	dst.create(src.size(), src.type());
+    dst.create(src.size(), src.type());
     for(int i=0; i< src.rows; i++) 
         for(int j=0; j< src.cols; j++) {
             
-            if(src.channels() >= 3) {
-                Vec3b srcPixel, dstPixel, blendPixel;
-                srcPixel = src.at<Vec3b>(i,j);
-                blendPixel = blend.at<Vec3b>(i,j);
-
-                dstPixel.val[0] = (blendPixel.val[0] >= 255)? 255: min(255, (srcPixel.val[0]*255)/(255-blendPixel.val[0]));
-                dstPixel.val[1] = (blendPixel.val[1] >= 255)? 255: min(255, (srcPixel.val[1]*255)/(255-blendPixel.val[1]));
-                dstPixel.val[2] = (blendPixel.val[2] >= 255)? 255: min(255, (srcPixel.val[2]*255)/(255-blendPixel.val[2]));
-
-                dst.at<Vec3b>(i,j) = dstPixel;
-            }
-            else if(src.channels() == 1) {
-                uchar srcPixel, dstPixel, blendPixel;
-                srcPixel = src.at<uchar>(i,j);
-                blendPixel = blend.at<uchar>(i,j);
+            if(src.channels() == 1) {
+                int srcPixel, dstPixel, blendPixel;
+                srcPixel = (int)src.at<uchar>(i,j);
+                blendPixel = (int)blend.at<uchar>(i,j);
 
                 //dstPixel = srcPixel + (uchar)( (255.0 - srcPixel) * (blendPixel/255.0) );
                 dstPixel = (blendPixel >= 255)? 255: min(255, (srcPixel*255)/(255-blendPixel));
 
-                dst.at<uchar>(i,j) = dstPixel;
+                dst.at<uchar>(i,j) = (uchar)dstPixel;
             }
         }
 }
@@ -294,7 +319,8 @@ void oilPaintFilter(Mat& src1, Mat& dst1, int radius, int levels)
 }
 
 void waterColorFilter(Mat& src, Mat& dst, int spatialRadius, int colorRadius, int maxLevels, int scaleFactor) {
-	spatialRadius = spatialRadius/4;
+	/*
+    spatialRadius = spatialRadius/4;
 	colorRadius = colorRadius/2;
 	maxLevels = maxLevels/10;
 	double scaleFactor1 = scaleFactor*0.01;
@@ -314,4 +340,38 @@ void waterColorFilter(Mat& src, Mat& dst, int spatialRadius, int colorRadius, in
 	} 
 	
 	cvtColor(dst1, dst, CV_RGB2RGBA);
+    */
+
+    Mat src_blur, dst1;
+    GaussianBlur(src, src_blur, Size(3,3), 0);
+    cvtColor(src_blur, src_blur, CV_RGBA2RGB);
+    
+    resize(src_blur, src_blur, Size(), 0.7, 0.7, INTER_LINEAR);
+    kmeans(src_blur,dst1,10);
+    resize(dst1, dst1, src.size(), 0, 0, INTER_CUBIC);
+    cvtColor(dst1, dst, CV_RGB2RGBA);
+}
+
+void kmeans(Mat& src, Mat& dst, int clusters) {
+
+    Mat samples(src.rows * src.cols, 3, CV_32F);
+    for( int y = 0; y < src.rows; y++ )
+        for( int x = 0; x < src.cols; x++ )
+          for( int z = 0; z < 3; z++)
+            samples.at<float>(y + x*src.rows, z) = src.at<Vec3b>(y,x)[z];
+
+        Mat labels;
+        int attempts = 1;
+        Mat centers;
+        kmeans(samples, clusters, labels, TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10000, 0.0001), attempts, KMEANS_PP_CENTERS, centers );
+
+        dst.create( src.size(), src.type() );
+        for( int y = 0; y < src.rows; y++ )
+            for( int x = 0; x < src.cols; x++ )
+            { 
+              int cluster_idx = labels.at<int>(y + x*src.rows,0);
+              dst.at<Vec3b>(y,x)[0] = centers.at<float>(cluster_idx, 0);
+              dst.at<Vec3b>(y,x)[1] = centers.at<float>(cluster_idx, 1);
+              dst.at<Vec3b>(y,x)[2] = centers.at<float>(cluster_idx, 2);
+          }
 }
