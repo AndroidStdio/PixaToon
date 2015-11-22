@@ -31,7 +31,7 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
         view.findViewById(R.id.graySketchFilterBtn).setOnClickListener(this);
         view.findViewById(R.id.pencilSketchFilterBtn).setOnClickListener(this);
         view.findViewById(R.id.oilPaintFilterBtn).setOnClickListener(this);
-        view.findViewById(R.id.waterColorFilterBtn).setOnClickListener(this);
+//        view.findViewById(R.id.waterColorFilterBtn).setOnClickListener(this);
         return view;
     }
 
@@ -60,10 +60,10 @@ public class FilterSelectorFragment extends Fragment implements View.OnClickList
                 Log.d(TAG, "Oil-Paint Filter Btn clicked");
                 callback.onFilterSelect(FilterType.OIL_PAINT);
                 return;
-            case R.id.waterColorFilterBtn:
-                Log.d(TAG, "Water Color Filter Btn clicked");
-                callback.onFilterSelect(FilterType.WATER_COLOR);
-                return;
+//            case R.id.waterColorFilterBtn:
+//                Log.d(TAG, "Water Color Filter Btn clicked");
+//                callback.onFilterSelect(FilterType.WATER_COLOR);
+//                return;
         }
     }
 }

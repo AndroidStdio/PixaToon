@@ -64,7 +64,7 @@
         android:layout_height="@dimen/button2_size"
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_below="@id/filterSelectorPanel"
         android:background="@drawable/round_btn"
         android:src="@drawable/filters_icon"
@@ -78,8 +78,8 @@
         android:id="@+id/configFilterBtn"
         android:layout_width="@dimen/button2_size"
         android:layout_height="@dimen/button2_size"
-        android:layout_below="@id/selectFilterBtn"
-        android:layout_alignParentLeft="true"
+        android:layout_above="@id/filterConfigPanel"
+        android:layout_alignParentRight="true"
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
         android:background="@drawable/round_btn"
@@ -102,7 +102,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_above="@id/viewerActionBtn"
+        android:layout_above="@id/openCameraBtn"
         android:layout_margin="20dp">
     </LinearLayout>
 </RelativeLayout>
