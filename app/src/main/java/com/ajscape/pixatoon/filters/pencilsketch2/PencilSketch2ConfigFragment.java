@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.filters.pencilsketch;
+package com.ajscape.pixatoon.filters.pencilsketch2;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -11,39 +11,39 @@ import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.FilterConfigListener;
 import com.ajscape.pixatoon.filters.FilterManager;
 
-public class PencilSketchConfigFragment extends Fragment {
+public class PencilSketch2ConfigFragment extends Fragment {
 
     private FilterConfigListener callback;
-    private SeekBar sketchBlendSeekBar, contrastSeekBar;
-    private PencilSketchFilter filter;
+    private SeekBar blurRadiusSeekBar, contrastSeekBar;
+    private PencilSketch2Filter filter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         callback = (FilterConfigListener)getActivity();
-        filter = (PencilSketchFilter)FilterManager.getInstance().getCurrentFilter();
+        filter = (PencilSketch2Filter)FilterManager.getInstance().getCurrentFilter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_filterconfig_sketch, container, false);
+        View view =  inflater.inflate(R.layout.fragment_filterconfig_pencilsketch2, container, false);
         initializeSeekbars(view);
         return view;
     }
 
     private void initializeSeekbars(View view) {
-        sketchBlendSeekBar = (SeekBar)view.findViewById(R.id.sketchBlendSeekBar);
+        blurRadiusSeekBar = (SeekBar)view.findViewById(R.id.blurRadiusSeekBar);
         contrastSeekBar = (SeekBar)view.findViewById(R.id.contrastSeekBar);
 
-        sketchBlendSeekBar.setProgress(filter.getSketchBlend());
+        blurRadiusSeekBar.setProgress(filter.getBlurRadius());
         contrastSeekBar.setProgress(filter.getContrast());
 
-        sketchBlendSeekBar.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
+        blurRadiusSeekBar.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                filter.setSketchBlend(progress);
+                filter.setBlurRadius(progress);
                 callback.onFilterConfigChanged();
             }
 

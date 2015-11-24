@@ -34,10 +34,10 @@
                     android:layout_margin="10dp"
                     android:padding="0dp" />
                 <ImageButton
-                    android:id="@+id/graySketchFilterBtn"
+                    android:id="@+id/colorSketchFilterBtn"
                     android:layout_width="@dimen/filter_btn_size"
                     android:layout_height="@dimen/filter_btn_size"
-                    android:src="@drawable/graysketch_filter_icon"
+                    android:src="@drawable/colorsketch_filter_icon"
                     android:scaleType="fitCenter"
                     android:layout_margin="10dp"
                     android:padding="0dp" />
@@ -46,6 +46,14 @@
                     android:layout_width="@dimen/filter_btn_size"
                     android:layout_height="@dimen/filter_btn_size"
                     android:src="@drawable/pencilsketch_filter_icon"
+                    android:scaleType="fitCenter"
+                    android:layout_margin="10dp"
+                    android:padding="0dp" />
+                <ImageButton
+                    android:id="@+id/pencilSketch2FilterBtn"
+                    android:layout_width="@dimen/filter_btn_size"
+                    android:layout_height="@dimen/filter_btn_size"
+                    android:src="@drawable/pencilsketch2_filter_icon"
                     android:scaleType="fitCenter"
                     android:layout_margin="10dp"
                     android:padding="0dp" />

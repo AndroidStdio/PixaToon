@@ -2,16 +2,18 @@ package com.ajscape.pixatoon.filters;
 
 import android.app.Application;
 
-import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonFilter;
 import com.ajscape.pixatoon.filters.colorcartoon.ColorCartoonConfigFragment;
+import com.ajscape.pixatoon.filters.colorsketch.ColorSketchConfigFragment;
+import com.ajscape.pixatoon.filters.colorsketch.ColorSketchFilter;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonConfigFragment;
 import com.ajscape.pixatoon.filters.graycartoon.GrayCartoonFilter;
-import com.ajscape.pixatoon.filters.graysketch.GraySketchFilter;
-import com.ajscape.pixatoon.filters.oilpaint.OilPaintConfigFragment;
-import com.ajscape.pixatoon.filters.oilpaint.OilPaintFilter;
 import com.ajscape.pixatoon.filters.pencilsketch.PencilSketchConfigFragment;
 import com.ajscape.pixatoon.filters.pencilsketch.PencilSketchFilter;
+import com.ajscape.pixatoon.filters.oilpaint.OilPaintConfigFragment;
+import com.ajscape.pixatoon.filters.oilpaint.OilPaintFilter;
+import com.ajscape.pixatoon.filters.pencilsketch2.PencilSketch2ConfigFragment;
+import com.ajscape.pixatoon.filters.pencilsketch2.PencilSketch2Filter;
 import com.ajscape.pixatoon.filters.watercolor.WaterColorConfigFragment;
 import com.ajscape.pixatoon.filters.watercolor.WaterColorFilter;
 
@@ -62,13 +64,17 @@ public class FilterManager extends Application {
                 FilterType.GRAY_CARTOON,
                 new GrayCartoonConfigFragment()) );
 
-        mFilterList.add( new GraySketchFilter(
-                FilterType.GRAY_SKETCH,
-                null) );
-
         mFilterList.add( new PencilSketchFilter(
                 FilterType.PENCIL_SKETCH,
                 new PencilSketchConfigFragment()) );
+
+        mFilterList.add( new ColorSketchFilter(
+                FilterType.COLOR_SKETCH,
+                new ColorSketchConfigFragment()) );
+
+        mFilterList.add( new PencilSketch2Filter(
+                FilterType.PENCIL_SKETCH2,
+                new PencilSketch2ConfigFragment()) );
 
         mFilterList.add( new OilPaintFilter(
                 FilterType.OIL_PAINT,

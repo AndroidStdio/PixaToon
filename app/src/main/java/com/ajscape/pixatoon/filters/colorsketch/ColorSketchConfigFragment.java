@@ -1,4 +1,4 @@
-package com.ajscape.pixatoon.filters.pencilsketch;
+package com.ajscape.pixatoon.filters.colorsketch;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -11,17 +11,17 @@ import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.FilterConfigListener;
 import com.ajscape.pixatoon.filters.FilterManager;
 
-public class PencilSketchConfigFragment extends Fragment {
+public class ColorSketchConfigFragment extends Fragment {
 
     private FilterConfigListener callback;
     private SeekBar sketchBlendSeekBar, contrastSeekBar;
-    private PencilSketchFilter filter;
+    private ColorSketchFilter filter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         callback = (FilterConfigListener)getActivity();
-        filter = (PencilSketchFilter)FilterManager.getInstance().getCurrentFilter();
+        filter = (ColorSketchFilter)FilterManager.getInstance().getCurrentFilter();
     }
 
     @Override

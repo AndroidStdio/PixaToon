@@ -15,21 +15,27 @@ JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_grayCartoonFilte
 	grayCartoonFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)thickness, (int)threshold);
 }
 
-JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_setSketchTextures(JNIEnv* env, jobject, jlong addrDarkTex, jlong addrMediumTex, jlong addrLightTex)
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_setSketchTexture(JNIEnv* env, jobject, jlong sketchTexture)
 { 
 	SketchFilter* sketchFilter =  SketchFilter::getInstance();
-	sketchFilter->setSketchTextures(*(Mat*)addrDarkTex, *(Mat*)addrMediumTex, *(Mat*)addrLightTex);
+	sketchFilter->setSketchTexture(*(Mat*)sketchTexture);
 }
 
-JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_graySketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint thickness, jint threshold)
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_pencilSketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint sketchBlend, jint contrast)
 { 
 	SketchFilter* sketchFilter =  SketchFilter::getInstance();
-	sketchFilter->applyGraySketch(*(Mat*)addrSrc, *(Mat*)addrDst);
+	sketchFilter->applyPencilSketch(*(Mat*)addrSrc, *(Mat*)addrDst, (int)sketchBlend, (int)contrast);
 }
 
-JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_pencilSketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint blurRadius, jint contrast)
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_colorSketchFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint sketchBlend, jint contrast)
 { 
-	pencilSketchFilter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)blurRadius, (int)contrast);
+	SketchFilter* sketchFilter =  SketchFilter::getInstance();
+	sketchFilter->applyColorSketch(*(Mat*)addrSrc, *(Mat*)addrDst, (int)sketchBlend, (int)contrast);
+}
+
+JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_pencilSketch2Filter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint blurRadius, jint contrast)
+{ 
+	pencilSketch2Filter(*(Mat*)addrSrc, *(Mat*)addrDst, (int)blurRadius, (int)contrast);
 }
 
 JNIEXPORT void JNICALL Java_com_ajscape_pixatoon_filters_Native_oilPaintFilter(JNIEnv* env, jobject, jlong addrSrc, jlong addrDst, jint radius, jint levels)

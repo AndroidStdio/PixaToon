@@ -28,8 +28,8 @@ public class OilPaintFilter extends Filter {
 
     @Override
     public void resetConfig() {
-        radius = 20;
-        levels = 50;
+        radius = 35;
+        levels = 40;
     }
 
     public int getLevels() {

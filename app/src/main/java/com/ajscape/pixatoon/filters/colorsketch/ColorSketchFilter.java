@@ -1,55 +1,63 @@
-package com.ajscape.pixatoon.filters.graysketch;
+package com.ajscape.pixatoon.filters.colorsketch;
 
 import android.app.Fragment;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
 
-import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.Filter;
 import com.ajscape.pixatoon.filters.FilterType;
 import com.ajscape.pixatoon.filters.Native;
-import com.ajscape.pixatoon.viewer.MainActivity;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.io.IOException;
-
 /**
  * Created by AtulJadhav on 9/20/2015.
  */
-public class GraySketchFilter extends Filter {
+public class ColorSketchFilter extends Filter {
 
-    private Mat[] mSketchTextures;
+    private Mat mSketchTexture;
+    private int sketchBlend;
+    private int contrast;
 
-    public GraySketchFilter(FilterType filterType, Fragment configFragment) {
+    public ColorSketchFilter(FilterType filterType, Fragment configFragment) {
         super(filterType, configFragment);
         resetConfig();
-        mSketchTextures = new Mat[3];
     }
 
-    public void loadSketchTextures(Resources res, int darkTexRes, int mediumTexRes, int lightTexRes) {
-        mSketchTextures[0] = loadResource(res, darkTexRes);
-        mSketchTextures[1] = loadResource(res, mediumTexRes);
-        mSketchTextures[2] = loadResource(res, lightTexRes);
-        Native.setSketchTextures(
-                mSketchTextures[0].getNativeObjAddr(),
-                mSketchTextures[1].getNativeObjAddr(),
-                mSketchTextures[2].getNativeObjAddr() );
+    public int getSketchBlend() {
+        return sketchBlend;
+    }
+
+    public void setSketchBlend(int sketchBlend) {
+        this.sketchBlend = sketchBlend;
+    }
+
+    public int getContrast() {
+        return contrast;
+    }
+
+    public void setContrast(int contrast) {
+        this.contrast = contrast;
+    }
+
+    public void loadSketchTexture(Resources res, int sketchTexRes) {
+        mSketchTexture = loadResource(res, sketchTexRes);
+        Native.setSketchTexture(mSketchTexture.getNativeObjAddr());
     }
 
     @Override
     public void process(Mat src, Mat dst) {
-        Native.graySketchFilter(src.getNativeObjAddr(), dst.getNativeObjAddr());
+        Native.colorSketchFilter(src.getNativeObjAddr(), dst.getNativeObjAddr(), sketchBlend, contrast);
     }
 
     @Override
     public void resetConfig() {
+        sketchBlend = 80;
+        contrast = 30;
     }
 
     private static Mat loadResource(Resources res, int drawable) {

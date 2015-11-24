@@ -3,14 +3,19 @@
 #define INPUT_MAX 100
 
 #define CARTOON_THICK_MIN 3
-#define CARTOON_THICK_MAX 201
+#define CARTOON_THICK_MAX 51
 #define CARTOON_THRESH_MIN 1
 #define CARTOON_THRESH_MAX 9
 
-#define SKETCH_BLUR_MIN 3
-#define SKETCH_BLUR_MAX 51
+#define SKETCH_BLEND_MIN 0.0
+#define SKETCH_BLEND_MAX 0.9
 #define SKETCH_CONTRAST_MIN 1.0
-#define SKETCH_CONTRAST_MAX 10.0 
+#define SKETCH_CONTRAST_MAX 2.0 
+
+#define SKETCH2_BLUR_MIN 3
+#define SKETCH2_BLUR_MAX 51
+#define SKETCH2_CONTRAST_MIN 1.0
+#define SKETCH2_CONTRAST_MAX 10.0 
 
 #define OILPAINT_RADIUS_MIN 1
 #define OILPAINT_RADIUS_MAX 10
@@ -145,62 +150,98 @@ SketchFilter* SketchFilter::getInstance()
 	return instance;
 }
 
-SketchFilter::SketchFilter()
-{	
-	q_steps[0] = 50;
-	q_steps[1] = 100;
-	q_steps[2] = 150;
-	q_steps[3] = 255;
+SketchFilter::SketchFilter() {}
+
+void SketchFilter::setSketchTexture(Mat& texture)
+{
+	this->texture = texture;
 }
 
-void SketchFilter::setSketchTextures(Mat& dark_t, Mat& medium_t, Mat& light_t)
-{
-	textures[0] = dark_t;
-	textures[1] = medium_t;
-	textures[2] = light_t;
+void SketchFilter::applyPencilSketch(Mat& src, Mat& dst, int blend, int contrast) {
+
+    float blend1 = (float)(blend*(SKETCH_BLEND_MAX - SKETCH_BLEND_MIN))/(float)INPUT_MAX + SKETCH_BLEND_MIN;
+    float contrast1 = (float)(contrast*(SKETCH_CONTRAST_MAX - SKETCH_CONTRAST_MIN))/(float)INPUT_MAX + SKETCH_CONTRAST_MIN;
+
+    Mat src_gray, dst_gray;
+    cvtColor(src, src_gray, CV_RGBA2GRAY);
+
+    dst_gray.create(src_gray.size(), src_gray.type());
+    for(int i=0; i< dst.rows; i++) 
+
+        for(int j=0; j< dst.cols; j++) {     
+
+            uchar srcPixel, dstPixel, texPixel;
+            srcPixel = src_gray.at<uchar>(i,j);
+
+            texPixel = texture.at<uchar>(i%texture.rows, j%texture.cols)*blend1;
+            dstPixel = (texPixel >= 255)? 255: min(255, (srcPixel*255)/(255-texPixel));
+
+            dst_gray.at<uchar>(i,j) = dstPixel;
+        }
+    dst_gray = ~(contrast1*(~dst_gray));
+    cvtColor(dst_gray, dst, CV_GRAY2RGBA);
 }
 
-void SketchFilter::applyGraySketch(Mat& src, Mat& dst)
-{
-	Mat src_blurred, src_gray, edges, dst_gray;
-	GaussianBlur(src, src_blurred, Size(5,5),0);
-	cvtColor(src_blurred, src_gray, CV_RGBA2GRAY);
+
+void SketchFilter::applyColorSketch(Mat& src, Mat& dst, int blend, int contrast) {
+
+    float blend1 = (float)(blend*(SKETCH_BLEND_MAX - SKETCH_BLEND_MIN))/(float)INPUT_MAX + SKETCH_BLEND_MIN;
+    float contrast1 = (float)(contrast*(SKETCH_CONTRAST_MAX - SKETCH_CONTRAST_MIN))/(float)INPUT_MAX + SKETCH_CONTRAST_MIN;
+
+    for(int i=0; i< src.rows; i++) 
+        for(int j=0; j< src.cols; j++) {
+
+            Vec4b srcPixel, dstPixel;
+            uchar texPixel;
+            srcPixel = src.at<Vec4b>(i,j);
+            texPixel = texture.at<uchar>(i%texture.rows, j%texture.cols)*blend1;
+
+            dstPixel.val[0] = (texPixel >= 255)? 255: min(255, (srcPixel.val[0]*255)/(255-texPixel));
+            dstPixel.val[1] = (texPixel >= 255)? 255: min(255, (srcPixel.val[1]*255)/(255-texPixel));
+            dstPixel.val[2] = (texPixel >= 255)? 255: min(255, (srcPixel.val[2]*255)/(255-texPixel));
+            dstPixel.val[3] = srcPixel.val[3];
+
+            dst.at<Vec4b>(i,j) = dstPixel;
+        }
+    dst = ~(contrast1*(~dst));
+}
+
+// void SketchFilter::applyGraySketch(Mat& src, Mat& dst)
+// {
+// 	Mat src_blurred, src_gray, edges, dst_gray;
+// 	GaussianBlur(src, src_blurred, Size(5,5),0);
+// 	cvtColor(src_blurred, src_gray, CV_RGBA2GRAY);
 	
-	dst_gray.create(src_gray.size(), src_gray.type());
-	for(int row=0; row<src.rows; row++)
-		for(int col=0; col<src.cols; col++)
-		{
-			uchar src_pixel, dst_pixel;
-			src_pixel = src_gray.at<uchar>(row,col);
+// 	dst_gray.create(src_gray.size(), src_gray.type());
+// 	for(int row=0; row<src.rows; row++)
+// 		for(int col=0; col<src.cols; col++)
+// 		{
+// 			uchar src_pixel, dst_pixel;
+// 			src_pixel = src_gray.at<uchar>(row,col);
 			
-            int t_row = row % textures[0].rows;
-            int t_col = col % textures[0].cols;
+//             int t_row = row % textures[0].rows;
+//             int t_col = col % textures[0].cols;
 
-            if(src_pixel <= q_steps[0])
-				dst_pixel = textures[0].at<uchar>(t_row, t_col);
-			else if(src_pixel <= q_steps[1])
-				dst_pixel = textures[1].at<uchar>(t_row, t_col);
-			else if(src_pixel <= q_steps[2])
-				dst_pixel = textures[2].at<uchar>(t_row, t_col);
-			else if(src_pixel <= q_steps[3])
-				dst_pixel = 255;
+//             if(src_pixel <= q_steps[0])
+// 				dst_pixel = textures[0].at<uchar>(t_row, t_col);
+// 			else if(src_pixel <= q_steps[1])
+// 				dst_pixel = textures[1].at<uchar>(t_row, t_col);
+// 			else if(src_pixel <= q_steps[2])
+// 				dst_pixel = textures[2].at<uchar>(t_row, t_col);
+// 			else if(src_pixel <= q_steps[3])
+// 				dst_pixel = 255;
 			
-			dst_gray.at<uchar>(row,col) = dst_pixel;
-		}
-	cvtColor(dst_gray, dst, CV_GRAY2RGBA);
-}
+// 			dst_gray.at<uchar>(row,col) = dst_pixel;
+// 		}
+// 	cvtColor(dst_gray, dst, CV_GRAY2RGBA);
+// }
 
-void SketchFilter::applyColorSketch(Mat& src, Mat& dst)
-{
-	//todo
-}
-
-void pencilSketchFilter(Mat& src, Mat& dst, int blurRadius, int contrast)
+void pencilSketch2Filter(Mat& src, Mat& dst, int blurRadius, int contrast)
 {
 	// denormalize params
-	blurRadius = (blurRadius*(SKETCH_BLUR_MAX - SKETCH_BLUR_MIN))/INPUT_MAX + SKETCH_BLUR_MIN;
+	blurRadius = (blurRadius*(SKETCH2_BLUR_MAX - SKETCH2_BLUR_MIN))/INPUT_MAX + SKETCH2_BLUR_MIN;
 	if(blurRadius%2 == 0) blurRadius++;
-	float contrast1 = (float)(contrast*(SKETCH_CONTRAST_MAX - SKETCH_CONTRAST_MIN))/(float)INPUT_MAX + SKETCH_CONTRAST_MIN;
+	float contrast1 = (float)(contrast*(SKETCH2_CONTRAST_MAX - SKETCH2_CONTRAST_MIN))/(float)INPUT_MAX + SKETCH2_CONTRAST_MIN;
 	
 	Mat src_gray, dst_gray, blend;
     cvtColor(src, src_gray, CV_RGBA2GRAY);

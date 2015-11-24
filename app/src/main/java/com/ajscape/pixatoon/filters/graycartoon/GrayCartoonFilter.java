@@ -28,7 +28,7 @@ public class GrayCartoonFilter extends Filter {
 
     @Override
     public void resetConfig() {
-        thickness = 10;
+        thickness = 40;
         threshold = 50;
     }
 
