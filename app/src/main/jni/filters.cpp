@@ -23,6 +23,11 @@
 #define OILPAINT_LEVELS_MAX 30
 
 
+void rotate90(Mat& src, Mat& dst) {
+    dst = src.t();
+    dst = flip(dst,dst,1);
+}
+
 /* Color-Cartoon Filter Imaplementation */
 void colorCartoonFilter(Mat& src, Mat& dst, int edgeThickness, int edgeThreshold) 
 {	

@@ -392,7 +392,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         if (mListener != null) {
             modified = mListener.onCameraFrame(frame);
         } else {
-            modified = frame.rgba();
+            modified = frame.rgba().t();
         }
 
         boolean bmpValid = true;
@@ -474,6 +474,12 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected Size calculateCameraFrameSize(List<?> supportedSizes, ListItemAccessor accessor, int surfaceWidth, int surfaceHeight) {
         int calcWidth = 0;
         int calcHeight = 0;
+
+        if(surfaceWidth < surfaceHeight) {
+            int temp = surfaceHeight;
+            surfaceHeight = surfaceWidth;
+            surfaceWidth = temp;
+        }
 
         int maxAllowedWidth = (mMaxWidth != MAX_UNSPECIFIED && mMaxWidth < surfaceWidth)? mMaxWidth : surfaceWidth;
         int maxAllowedHeight = (mMaxHeight != MAX_UNSPECIFIED && mMaxHeight < surfaceHeight)? mMaxHeight : surfaceHeight;

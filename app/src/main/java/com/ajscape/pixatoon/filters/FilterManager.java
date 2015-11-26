@@ -97,14 +97,19 @@ public class FilterManager extends Application {
         if(mCurrentFilter != null)
             mFilterProcessor.processFilter(mCurrentFilter, srcMat, dstMat);
         else
-            srcMat.copyTo(dstMat);
+            //srcMat.copyTo(dstMat);
+            dstMat = srcMat.t();
     }
 
     public void setCurrentFilter(FilterType filterType) {
+        if(mCurrentFilter!=null)
+            mCurrentFilter.resetConfig();
         mCurrentFilter = mFilterType2FilterMap.get(filterType);
     }
 
     public void reset() {
+        if(mCurrentFilter!=null)
+            mCurrentFilter.resetConfig();
         mCurrentFilter = null;
         mFilterProcessor.changeInputMode();
     }

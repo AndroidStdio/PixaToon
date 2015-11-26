@@ -22,18 +22,21 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class PictureViewerFragment extends Fragment {
 
     private static final String TAG="PictureViewer:";
-    //private ImageView mPictureView;
     private PictureSurfaceView mPictureView;
     private Bitmap mScaledInputBitmap, mScaledOutputBitmap;
     private Mat mInputMat, mScaledInputMat, mScaledOutputMat;
     private FilterManager mFilterManager;
+    private boolean mInputRotated = false;
     private PictureUpdateThread mUpdateThread;
+    private AtomicBoolean mPendingUpdate = new AtomicBoolean(false);
 
     public PictureViewerFragment() {
         // Required empty public constructor
@@ -70,6 +73,14 @@ public class PictureViewerFragment extends Fragment {
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
 
+        // If input is landscape, rotate for better screen coverage
+        if(inputBitmap.getWidth()>inputBitmap.getHeight()) {
+            inputBitmap = PictureUtils.rotateBitmap(inputBitmap, 90);
+            mInputRotated = true;
+        } else {
+            mInputRotated = false;
+        }
+
         // Get scaled bitmap and mat fit to screen, for preview filter display
         mScaledInputBitmap = PictureUtils.resizeBitmap(inputBitmap, width, height);
         mScaledOutputBitmap = mScaledInputBitmap.copy(mScaledInputBitmap.getConfig(), true);
@@ -86,6 +97,8 @@ public class PictureViewerFragment extends Fragment {
         if(mUpdateThread == null || !mUpdateThread.isAlive()) {
             mUpdateThread = new PictureUpdateThread();
             mUpdateThread.start();
+        } else {
+            mPendingUpdate.set(true);
         }
     }
 
@@ -96,6 +109,8 @@ public class PictureViewerFragment extends Fragment {
             currentFilter.process(mInputMat, outputMat);
             Bitmap outputBitmap = Bitmap.createBitmap(outputMat.width(),outputMat.height(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(outputMat,outputBitmap);
+            if(mInputRotated)
+                outputBitmap = PictureUtils.rotateBitmap(outputBitmap,-90);
             pictureCallback.onPictureAvailable(outputBitmap);
         }
     }
@@ -104,12 +119,15 @@ public class PictureViewerFragment extends Fragment {
 
         @Override
         public void run() {
-            Filter currentFilter = mFilterManager.getCurrentFilter();
-            if(currentFilter != null) {
-                currentFilter.process(mScaledInputMat, mScaledOutputMat);
-                Utils.matToBitmap(mScaledOutputMat, mScaledOutputBitmap);
-            }
-            mPictureView.setImageBitmap(mScaledOutputBitmap);
+            do {
+                mPendingUpdate.set(false);
+                Filter currentFilter = mFilterManager.getCurrentFilter();
+                if (currentFilter != null) {
+                    currentFilter.process(mScaledInputMat, mScaledOutputMat);
+                    Utils.matToBitmap(mScaledOutputMat, mScaledOutputBitmap);
+                }
+                mPictureView.setImageBitmap(mScaledOutputBitmap);
+            }while(mPendingUpdate.get() == true);
         }
     }
 }

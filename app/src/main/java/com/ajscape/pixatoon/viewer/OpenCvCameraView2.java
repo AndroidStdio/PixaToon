@@ -148,6 +148,11 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
                 Log.d(TAG, "getSupportedPreviewSizes()");
                 List<android.hardware.Camera.Size> sizes = params.getSupportedPreviewSizes();
 
+                if(width > height) {
+                    int temp = width;
+                    width = height;
+                    height = temp;
+                }
                 if (sizes != null) {
                     /* Select the size that fits surface considering maximum size allowed */
                     Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
@@ -171,6 +176,10 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
                     mFrameWidth = params.getPreviewSize().width;
                     mFrameHeight = params.getPreviewSize().height;
 
+                    int temp = width;
+                    width = height;
+                    height = temp;
+
                     if ((getLayoutParams().width == LayoutParams.MATCH_PARENT) && (getLayoutParams().height == LayoutParams.MATCH_PARENT))
                         mScale = Math.min(((float)height)/mFrameHeight, ((float)width)/mFrameWidth);
                     else
@@ -191,19 +200,21 @@ public class OpenCvCameraView2 extends CameraBridgeViewBase implements PreviewCa
                     mFrameChain[0] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
                     mFrameChain[1] = new Mat(mFrameHeight + (mFrameHeight/2), mFrameWidth, CvType.CV_8UC1);
 
-                    AllocateCache();
-
                     mCameraFrame = new JavaCameraFrame[2];
                     mCameraFrame[0] = new JavaCameraFrame(mFrameChain[0], mFrameWidth, mFrameHeight);
                     mCameraFrame[1] = new JavaCameraFrame(mFrameChain[1], mFrameWidth, mFrameHeight);
+
+                    temp = mFrameWidth;
+                    mFrameWidth = mFrameHeight;
+                    mFrameHeight = temp;
+
+                    AllocateCache();
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                         mSurfaceTexture = new SurfaceTexture(MAGIC_TEXTURE_ID);
                         mCamera.setPreviewTexture(mSurfaceTexture);
                     } else
                         mCamera.setPreviewDisplay(null);
-
-                    mCamera.setDisplayOrientation(90);
 
                     /* Finally we are ready to start the preview */
                     Log.d(TAG, "startPreview");

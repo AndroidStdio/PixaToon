@@ -1,8 +1,10 @@
 package com.ajscape.pixatoon.viewer;
 
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.util.Log;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import com.ajscape.pixatoon.R;
 import com.ajscape.pixatoon.filters.FilterManager;
 import com.ajscape.pixatoon.filters.FilterType;
+import com.ajscape.pixatoon.filters.Native;
 import com.ajscape.pixatoon.filters.pencilsketch.PencilSketchFilter;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -24,6 +27,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,9 +50,8 @@ public class CameraViewerFragment extends Fragment implements CvCameraViewListen
                     // Load native library after(!) OpenCV initialization
                     System.loadLibrary("image_filters");
                     mCameraView.enableView();
-                    ((PencilSketchFilter)mFilterManager.getFilter(FilterType.PENCIL_SKETCH)).loadSketchTexture(
-                            getActivity().getApplicationContext().getResources(),
-                            R.drawable.sketch_texture1 );
+                    loadSketchTexture(getActivity().getApplicationContext().getResources(),
+                            R.drawable.sketch_texture1);
 
                 } break;
                 default:
@@ -141,6 +144,8 @@ public class CameraViewerFragment extends Fragment implements CvCameraViewListen
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             Bitmap pictureBitmap = BitmapFactory.decodeByteArray(data,0,data.length, options);
 
+            pictureBitmap = PictureUtils.rotateBitmap(pictureBitmap, 90);
+
             // Convert picture to mat, apply filter, and convert filtered mat back to bitmap
             Mat pictureMat = new Mat(pictureBitmap.getHeight(), pictureBitmap.getWidth(), CvType.CV_8UC4);
             Utils.bitmapToMat(pictureBitmap, pictureMat);
@@ -153,5 +158,15 @@ public class CameraViewerFragment extends Fragment implements CvCameraViewListen
         else {
             Log.e(TAG,"picture callback not set");
         }
+    }
+
+    public void loadSketchTexture(Resources res, int sketchTexRes) {
+        Mat mat, tempMat;
+        Bitmap bmp = BitmapFactory.decodeResource(res, sketchTexRes);
+        tempMat = new Mat(bmp.getHeight(), bmp.getWidth(), CvType.CV_8UC4);
+        Utils.bitmapToMat(bmp, tempMat);
+        mat = new Mat(tempMat.size(), CvType.CV_8UC1);
+        Imgproc.cvtColor(tempMat, mat, Imgproc.COLOR_RGBA2GRAY);
+        Native.setSketchTexture(mat.getNativeObjAddr());
     }
 }

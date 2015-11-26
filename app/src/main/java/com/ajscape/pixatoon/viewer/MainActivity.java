@@ -290,7 +290,7 @@ public class MainActivity extends Activity implements FilterSelectorListener, Fi
 
     private void saveBitmap(Bitmap bitmap) {
         try {
-            String savedPicturePath = PictureUtils.saveBitmap(getContentResolver(), bitmap);
+            String savedPicturePath = PictureUtils.saveBitmap(this, bitmap);
             Toast.makeText(getApplicationContext(), "Saved picture at " + savedPicturePath, Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(), "Error: Unable to take picture", Toast.LENGTH_SHORT).show();
